@@ -1,0 +1,2704 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mutual Induction Lab — Technical Documentation v2.0</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #07090d;
+        --surface: #0d1117;
+        --surface2: #111820;
+        --border: #1c2733;
+        --border2: #243040;
+        --accent: #5a8fb3;
+        --accent-dim: #2a4b64;
+        --accent-bright: #7fb2d6;
+        --gold: #d2b15c;
+        --gold-dim: #6f5a22;
+        --gold-bright: #e3c77a;
+        --green: #4a9a7a;
+        --green-bright: #76c7a5;
+        --red: #c46757;
+        --copper: #c8763a;
+        --copper2: #e09050;
+        --text: #c8d8e8;
+        --text-dim: #4a6070;
+        --text-muted: #2a3a4a;
+        --radius: 8px;
+        --radius-lg: 14px;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "DM Sans", sans-serif;
+        font-size: 15px;
+        line-height: 1.7;
+        min-height: 100vh;
+      }
+
+      /* ── SCROLLBAR ── */
+      ::-webkit-scrollbar {
+        width: 4px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border2);
+        border-radius: 2px;
+      }
+
+      /* ── LAYOUT ── */
+      .page-wrap {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        min-height: 100vh;
+      }
+
+      /* ── SIDEBAR ── */
+      .sidebar {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        padding: 28px 0 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .sidebar-logo {
+        padding: 0 22px 24px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 20px;
+      }
+      .sidebar-logo-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--accent-dim), var(--accent));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+      .sidebar-title {
+        font-family: "Syne", sans-serif;
+        font-size: 13px;
+        font-weight: 800;
+        color: #fff;
+        line-height: 1.3;
+      }
+      .sidebar-sub {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 2px;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        margin-top: 3px;
+      }
+      .nav-section-label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 8px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        padding: 0 22px 8px;
+        margin-top: 16px;
+      }
+      .nav-item {
+        display: block;
+        padding: 7px 22px;
+        font-size: 12.5px;
+        color: var(--text-dim);
+        text-decoration: none;
+        transition: all 0.18s;
+        border-left: 2px solid transparent;
+        line-height: 1.4;
+      }
+      .nav-item:hover {
+        color: var(--accent-bright);
+        border-left-color: var(--accent-dim);
+        background: rgba(90, 143, 179, 0.05);
+      }
+      .nav-item.active {
+        color: var(--accent-bright);
+        border-left-color: var(--accent);
+        background: rgba(90, 143, 179, 0.08);
+      }
+      .nav-item.sub {
+        padding-left: 34px;
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+      .nav-item.sub:hover {
+        color: var(--text-dim);
+      }
+      .sidebar-version {
+        margin-top: auto;
+        padding: 16px 22px 0;
+        border-top: 1px solid var(--border);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 1.5px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+      }
+
+      /* ── MAIN CONTENT ── */
+      .main {
+        padding: 60px 72px 100px 64px;
+        max-width: 920px;
+      }
+
+      /* ── HEADER HERO ── */
+      .doc-hero {
+        margin-bottom: 60px;
+        padding-bottom: 40px;
+        border-bottom: 1px solid var(--border);
+        position: relative;
+      }
+      .doc-hero::before {
+        content: "";
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          var(--accent) 30%,
+          var(--gold) 70%,
+          transparent 100%
+        );
+        opacity: 0.35;
+      }
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        border: 1px solid #ffd666;
+        background: rgba(255, 214, 102, 0.12);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #fff2b3;
+        margin-bottom: 18px;
+      }
+      .hero-badge .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #ffd666;
+        box-shadow: 0 0 8px rgba(255, 214, 102, 0.9);
+        animation: pulse 2s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+      .hero-title {
+        font-family: "Syne", sans-serif;
+        font-size: 36px;
+        font-weight: 800;
+        color: #fff;
+        line-height: 1.15;
+        margin-bottom: 10px;
+        letter-spacing: -0.5px;
+      }
+      .hero-title span {
+        color: #ffd666;
+      }
+      .doc-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 16px;
+      }
+      .doc-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 12px;
+        border-radius: 999px;
+        border: 1px solid #ffd666;
+        background: #1a2a3f;
+        color: #ffd666;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 1px;
+        text-decoration: none;
+        box-shadow: 0 0 12px rgba(255, 214, 102, 0.2);
+        transition: all 0.2s ease;
+      }
+      .doc-back:hover {
+        border-color: #ffb703;
+        color: #101820;
+        background: #ffb703;
+      }
+      .hero-subtitle {
+        font-size: 16px;
+        font-weight: 300;
+        color: var(--text-dim);
+        margin-bottom: 24px;
+        max-width: 580px;
+      }
+      .hero-meta {
+        display: flex;
+        gap: 28px;
+        flex-wrap: wrap;
+      }
+      .hero-meta-item {
+        display: flex;
+        flex-direction: column;
+      }
+      .hmi-label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 8px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 3px;
+      }
+      .hmi-val {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .hmi-val.accent {
+        color: var(--accent);
+      }
+      .hmi-val.gold {
+        color: var(--gold);
+      }
+      .hmi-val.green {
+        color: var(--green);
+      }
+
+      /* ── SECTIONS ── */
+      .doc-section {
+        margin-bottom: 64px;
+      }
+      .section-anchor {
+        display: block;
+        height: 80px;
+        margin-top: -80px;
+        visibility: hidden;
+      }
+
+      /* ── TYPOGRAPHY ── */
+      .section-eyebrow {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: var(--accent-dim);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .section-eyebrow::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+        max-width: 80px;
+      }
+      h2 {
+        font-family: "Syne", sans-serif;
+        font-size: 26px;
+        font-weight: 700;
+        color: #fff;
+        line-height: 1.25;
+        margin-bottom: 18px;
+      }
+      h3 {
+        font-family: "Syne", sans-serif;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text);
+        line-height: 1.3;
+        margin: 32px 0 12px;
+      }
+      h4 {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        color: var(--accent-bright);
+        text-transform: uppercase;
+        margin: 22px 0 8px;
+      }
+      p {
+        color: var(--text-dim);
+        margin-bottom: 14px;
+        font-weight: 300;
+        font-size: 14.5px;
+      }
+      p strong {
+        color: var(--text);
+        font-weight: 500;
+      }
+      a {
+        color: var(--accent-bright);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+
+      /* ── CALLOUTS ── */
+      .callout {
+        border-radius: var(--radius);
+        padding: 16px 20px;
+        margin: 20px 0;
+        border-left: 3px solid;
+        font-size: 13.5px;
+        line-height: 1.6;
+      }
+      .callout-title {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+      .callout p {
+        margin-bottom: 0;
+        font-size: 13.5px;
+      }
+      .callout.info {
+        background: rgba(90, 143, 179, 0.07);
+        border-color: var(--accent);
+      }
+      .callout.info .callout-title {
+        color: var(--accent-bright);
+      }
+      .callout.warning {
+        background: rgba(210, 177, 92, 0.07);
+        border-color: var(--gold);
+      }
+      .callout.warning .callout-title {
+        color: var(--gold-bright);
+      }
+      .callout.success {
+        background: rgba(74, 154, 122, 0.07);
+        border-color: var(--green);
+      }
+      .callout.success .callout-title {
+        color: var(--green-bright);
+      }
+      .callout.danger {
+        background: rgba(196, 103, 87, 0.07);
+        border-color: var(--red);
+      }
+      .callout.danger .callout-title {
+        color: #e08878;
+      }
+
+      /* ── FORMULA BLOCKS ── */
+      .formula-block {
+        background: var(--surface2);
+        border: 1px solid var(--border2);
+        border-radius: var(--radius-lg);
+        padding: 24px 28px;
+        margin: 20px 0;
+        position: relative;
+        overflow: hidden;
+      }
+      .formula-block::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          var(--accent-dim),
+          var(--gold-dim),
+          transparent
+        );
+      }
+      .formula-label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 8px;
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 14px;
+      }
+      .formula-main {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--gold-bright);
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+        line-height: 1.5;
+      }
+      .formula-vars {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 8px;
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 1px solid var(--border);
+      }
+      .fv {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+      }
+      .fv-sym {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--accent);
+        min-width: 28px;
+      }
+      .fv-desc {
+        font-size: 12px;
+        color: var(--text-dim);
+        font-weight: 300;
+      }
+
+      /* ── TABLES ── */
+      .doc-table-wrap {
+        overflow-x: auto;
+        margin: 20px 0;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+      }
+      .doc-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      .doc-table thead tr {
+        background: var(--surface2);
+        border-bottom: 1px solid var(--border2);
+      }
+      .doc-table th {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 8.5px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        padding: 12px 16px;
+        text-align: left;
+        font-weight: 600;
+      }
+      .doc-table td {
+        padding: 11px 16px;
+        color: var(--text-dim);
+        border-bottom: 1px solid var(--border);
+        font-weight: 300;
+        vertical-align: top;
+        line-height: 1.5;
+      }
+      .doc-table tr:last-child td {
+        border-bottom: none;
+      }
+      .doc-table tr:hover td {
+        background: rgba(255, 255, 255, 0.015);
+      }
+      .doc-table td.mono {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        color: var(--accent);
+      }
+      .doc-table td.gold {
+        color: var(--gold);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+      }
+      .doc-table td.green {
+        color: var(--green-bright);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+      }
+      .doc-table td.red {
+        color: var(--red);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+      }
+      .doc-table td strong {
+        color: var(--text);
+        font-weight: 500;
+      }
+
+      /* ── CODE BLOCKS ── */
+      pre {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 18px 20px;
+        overflow-x: auto;
+        margin: 16px 0;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        line-height: 1.7;
+        color: var(--accent-bright);
+      }
+      code {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        background: rgba(90, 143, 179, 0.12);
+        border: 1px solid var(--border2);
+        border-radius: 4px;
+        padding: 1px 7px;
+        color: var(--accent-bright);
+      }
+      pre code {
+        background: none;
+        border: none;
+        padding: 0;
+        font-size: 12px;
+      }
+
+      /* ── FACTOR CARDS ── */
+      .factor-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 14px;
+        margin: 20px 0;
+      }
+      .factor-card {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        transition: border-color 0.2s;
+        position: relative;
+        overflow: hidden;
+      }
+      .factor-card::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      }
+      .factor-card.blue::after {
+        background: var(--accent);
+      }
+      .factor-card.gold::after {
+        background: var(--gold);
+      }
+      .factor-card.green::after {
+        background: var(--green);
+      }
+      .factor-card.red::after {
+        background: var(--red);
+      }
+      .factor-card.copper::after {
+        background: var(--copper);
+      }
+      .factor-card:hover {
+        border-color: var(--border2);
+      }
+      .fc-icon {
+        font-size: 22px;
+        margin-bottom: 12px;
+      }
+      .fc-name {
+        font-family: "Syne", sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 6px;
+      }
+      .fc-range {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        color: var(--text-dim);
+        margin-bottom: 10px;
+      }
+      .fc-desc {
+        font-size: 12.5px;
+        color: var(--text-dim);
+        font-weight: 300;
+        line-height: 1.55;
+      }
+      .fc-effect {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid var(--border);
+        font-size: 11.5px;
+        font-family: "JetBrains Mono", monospace;
+      }
+      .fc-effect span {
+        margin-right: 6px;
+      }
+      .fc-up {
+        color: var(--green-bright);
+      }
+      .fc-down {
+        color: var(--red);
+      }
+      .fc-varies {
+        color: var(--gold);
+      }
+
+      /* ── FINDINGS GRID ── */
+      .finding-row {
+        display: grid;
+        grid-template-columns: 40px 1fr;
+        gap: 16px;
+        margin-bottom: 20px;
+        align-items: start;
+      }
+      .finding-num {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--border2);
+        line-height: 1;
+        padding-top: 4px;
+      }
+      .finding-content h4 {
+        margin-top: 0;
+      }
+      .finding-content p {
+        margin-bottom: 0;
+      }
+
+      /* ── METRIC SHOWCASE ── */
+      .metric-showcase {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin: 20px 0;
+      }
+      .ms-card {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 16px 14px;
+        text-align: center;
+      }
+      .ms-label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 8px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+      }
+      .ms-val {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 4px;
+      }
+      .ms-unit {
+        font-size: 10px;
+        color: var(--text-dim);
+        font-weight: 300;
+        margin-left: 2px;
+      }
+      .ms-card.a .ms-val {
+        color: var(--accent);
+        text-shadow: 0 0 10px rgba(90, 143, 179, 0.4);
+      }
+      .ms-card.g .ms-val {
+        color: var(--gold);
+        text-shadow: 0 0 10px rgba(210, 177, 92, 0.4);
+      }
+      .ms-card.gr .ms-val {
+        color: var(--green);
+        text-shadow: 0 0 10px rgba(74, 154, 122, 0.4);
+      }
+      .ms-card.r .ms-val {
+        color: var(--red);
+        text-shadow: 0 0 10px rgba(196, 103, 87, 0.4);
+      }
+
+      /* ── PROCESS STEPS ── */
+      .steps {
+        counter-reset: step-counter;
+        margin: 20px 0;
+      }
+      .step {
+        display: grid;
+        grid-template-columns: 36px 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
+        align-items: start;
+        counter-increment: step-counter;
+      }
+      .step-num {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--accent-dim);
+        border: 1px solid var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--accent-bright);
+        flex-shrink: 0;
+      }
+      .step-content h4 {
+        margin-top: 2px;
+        color: var(--text);
+        font-size: 13px;
+      }
+      .step-content p {
+        margin-bottom: 0;
+        font-size: 13px;
+      }
+
+      /* ── DIVIDER ── */
+      .section-divider {
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--border2),
+          transparent
+        );
+        margin: 40px 0;
+      }
+
+      /* ── OBSERVATION TABLE ── */
+      .obs-block {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 20px 24px;
+        margin: 16px 0;
+      }
+      .obs-title {
+        font-family: "Syne", sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 14px;
+      }
+      .obs-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
+      }
+      .obs-row:last-child {
+        border-bottom: none;
+      }
+      .obs-key {
+        color: var(--text-dim);
+        font-weight: 300;
+      }
+      .obs-val {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+      }
+      .obs-val.acc {
+        color: var(--accent);
+      }
+      .obs-val.gol {
+        color: var(--gold);
+      }
+      .obs-val.grn {
+        color: var(--green-bright);
+      }
+
+      /* ── PHYSICS DIAGRAM (SVG) ── */
+      .diagram-wrap {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        margin: 20px 0;
+        display: flex;
+        justify-content: center;
+        overflow-x: auto;
+      }
+
+      /* ── PRINT ── */
+      @media print {
+        body {
+          background: #fff;
+          color: #111;
+        }
+        .sidebar {
+          display: none;
+        }
+        .main {
+          padding: 20px;
+          max-width: 100%;
+        }
+        .page-wrap {
+          grid-template-columns: 1fr;
+        }
+        .formula-block {
+          background: #f5f5f5;
+          border-color: #ccc;
+        }
+        .formula-main {
+          color: #333;
+        }
+        h2,
+        h3 {
+          color: #111;
+        }
+        p,
+        .doc-table td {
+          color: #333;
+        }
+        .doc-table th {
+          color: #555;
+        }
+      }
+
+      /* ── RESPONSIVE ── */
+      @media (max-width: 900px) {
+        .page-wrap {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          position: static;
+          height: auto;
+        }
+        .main {
+          padding: 32px 24px 60px;
+        }
+        .metric-showcase {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .factor-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-wrap">
+      <!-- ══ SIDEBAR ══ -->
+      <nav class="sidebar">
+        <div class="sidebar-logo">
+          <div class="sidebar-logo-icon">⚡</div>
+          <div class="sidebar-title">MUTUAL INDUCTION LAB</div>
+          <div class="sidebar-sub">Technical Docs · v2.0</div>
+        </div>
+
+        <div class="nav-section-label">Overview</div>
+        <a class="nav-item" href="#overview">Introduction</a>
+        <a class="nav-item" href="#theory">Physics & Theory</a>
+
+        <div class="nav-section-label">Factors</div>
+        <a class="nav-item" href="#primary-factors">Primary Coil Factors</a>
+        <a class="nav-item sub" href="#n1">↳ Turns N₁</a>
+        <a class="nav-item sub" href="#core-material">↳ Core Material μᵣ</a>
+        <a class="nav-item sub" href="#source-current">↳ Source Current</a>
+        <a class="nav-item" href="#secondary-factors">Secondary Coil Factors</a>
+        <a class="nav-item sub" href="#n2">↳ Turns N₂</a>
+        <a class="nav-item sub" href="#load-resistance">↳ Load Resistance</a>
+        <a class="nav-item sub" href="#wire-resistance">↳ Wire Resistance</a>
+        <a class="nav-item" href="#geometry-factors">Geometry Factors</a>
+        <a class="nav-item sub" href="#separation">↳ Coil Separation</a>
+        <a class="nav-item sub" href="#alignment">↳ Coil Alignment</a>
+
+        <div class="nav-section-label">Modes</div>
+        <a class="nav-item" href="#modes">Source Modes</a>
+        <a class="nav-item sub" href="#ac-mode">↳ AC Mode</a>
+        <a class="nav-item sub" href="#reverse-polarity">↳ Reverse Polarity</a>
+        <a class="nav-item sub" href="#shielding">↳ Magnetic Shielding</a>
+
+        <div class="nav-section-label">Outputs</div>
+        <a class="nav-item" href="#computed-outputs">Computed Outputs</a>
+        <a class="nav-item" href="#led-indicator">LED Indicator</a>
+        <a class="nav-item" href="#findings">Experimental Findings</a>
+
+        <div class="nav-section-label">Practical</div>
+        <a class="nav-item" href="#practical">Practical Outreach</a>
+        <a class="nav-item" href="#real-world">Real-World Applications</a>
+        <a class="nav-item" href="#lab-exercises">Lab Exercises</a>
+        <a class="nav-item" href="#faraday">Faraday's Law</a>
+        <a class="nav-item" href="#limitations">Limitations & Notes</a>
+        <a class="nav-item" href="#glossary">Glossary</a>
+
+        <div class="sidebar-version">
+          Document Version 2.0<br />
+          Electromagnetic Induction Simulator<br />
+          Physics Lab Series
+        </div>
+      </nav>
+
+      <!-- ══ MAIN ══ -->
+      <main class="main">
+        <!-- HERO -->
+        <div class="doc-hero">
+          <div class="doc-actions">
+            <a class="doc-back" href="title.html">← Back to Landing</a>
+          </div>
+          <div class="hero-badge">
+            <div class="dot"></div>
+            Technical Documentation · Physics Simulation
+          </div>
+          <h1 class="hero-title">
+            Mutual Induction <span>Lab</span><br />Technical Reference
+          </h1>
+          <p class="hero-subtitle">
+            Complete documentation of all physical factors, computed
+            measurements, experimental findings, and practical applications of
+            the electromagnetic induction simulator.
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <span class="hmi-label">Document Version</span>
+              <span class="hmi-val accent">v2.0</span>
+            </div>
+            <div class="hero-meta-item">
+              <span class="hmi-label">Simulator</span>
+              <span class="hmi-val">Mutual Induction Lab</span>
+            </div>
+            <div class="hero-meta-item">
+              <span class="hmi-label">Domain</span>
+              <span class="hmi-val gold">Electromagnetism</span>
+            </div>
+            <div class="hero-meta-item">
+              <span class="hmi-label">Controls</span>
+              <span class="hmi-val green">10 Parameters</span>
+            </div>
+            <div class="hero-meta-item">
+              <span class="hmi-label">Outputs</span>
+              <span class="hmi-val">8 Live Metrics</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ SECTION 1: OVERVIEW ══ -->
+        <section class="doc-section" id="overview">
+          <span class="section-anchor" id="a-overview"></span>
+          <div class="section-eyebrow">Section 01</div>
+          <h2>Introduction & Purpose</h2>
+          <p>
+            The <strong>Mutual Induction Lab Simulator</strong> is an
+            interactive electromagnetic induction tool that models the physical
+            behaviour of two magnetically coupled coils — a primary coil driven
+            by a DC or AC source, and a secondary coil that produces an induced
+            EMF. It visualises all key parameters in real time, allowing
+            students and engineers to explore how changing any physical factor
+            directly impacts induction performance.
+          </p>
+          <p>
+            The simulator is built on simplified but accurate physics models
+            derived from Faraday's Law of Induction, Neumann's Formula for
+            mutual inductance, and the transformer principle. Every computed
+            value follows real equations, making it a suitable companion for
+            coursework in electromagnetic theory, power systems, and
+            electronics.
+          </p>
+
+          <div class="callout info">
+            <div class="callout-title">Scope</div>
+            <p>
+              This document covers: all 10 controllable input factors, 8
+              computed output quantities, 3 source modes, LED output behaviour,
+              physics derivations, experimental findings, real-world
+              applications, and suggested lab exercises.
+            </p>
+          </div>
+
+          <div class="metric-showcase">
+            <div class="ms-card a">
+              <div class="ms-label">Input Params</div>
+              <div class="ms-val">10<span class="ms-unit">controls</span></div>
+            </div>
+            <div class="ms-card g">
+              <div class="ms-label">Live Outputs</div>
+              <div class="ms-val">8<span class="ms-unit">metrics</span></div>
+            </div>
+            <div class="ms-card gr">
+              <div class="ms-label">Source Modes</div>
+              <div class="ms-val">3<span class="ms-unit">modes</span></div>
+            </div>
+            <div class="ms-card r">
+              <div class="ms-label">Physics Model</div>
+              <div class="ms-val">
+                Faraday<span class="ms-unit">+ Neumann</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══ SECTION 2: THEORY ══ -->
+        <section class="doc-section" id="theory">
+          <span class="section-anchor" id="a-theory"></span>
+          <div class="section-eyebrow">Section 02</div>
+          <h2>Physics & Theory</h2>
+
+          <h3>Faraday's Law of Electromagnetic Induction</h3>
+          <p>
+            When the magnetic flux passing through a circuit changes, an
+            electromotive force (EMF) is induced in that circuit. The magnitude
+            of the EMF is proportional to the rate of change of flux.
+          </p>
+
+          <div class="formula-block">
+            <div class="formula-label">Faraday's Law · Induced EMF</div>
+            <div class="formula-main">EMF = −N · (dΦ / dt)</div>
+            <div class="formula-vars">
+              <div class="fv">
+                <span class="fv-sym">EMF</span
+                ><span class="fv-desc"
+                  >Induced electromotive force (Volts)</span
+                >
+              </div>
+              <div class="fv">
+                <span class="fv-sym">N</span
+                ><span class="fv-desc">Number of turns in the coil</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">Φ</span
+                ><span class="fv-desc">Magnetic flux through coil (Weber)</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">t</span
+                ><span class="fv-desc">Time (seconds)</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">−</span
+                ><span class="fv-desc">Lenz's Law: opposes the change</span>
+              </div>
+            </div>
+          </div>
+
+          <h3>Mutual Inductance — Neumann's Formula</h3>
+          <p>
+            Mutual inductance <strong>M</strong> quantifies how well a change in
+            current in coil 1 induces a voltage in coil 2. It depends on coil
+            geometry, their separation, and the permeability of the medium
+            between them.
+          </p>
+
+          <div class="formula-block">
+            <div class="formula-label">
+              Neumann's Formula (simplified model used in simulator)
+            </div>
+            <div class="formula-main">M = k · √(L₁ · L₂)</div>
+            <div
+              class="formula-main"
+              style="
+                font-size: 15px;
+                color: var(--accent-bright);
+                margin-top: 6px;
+              "
+            >
+              L ∝ μᵣ · N²
+            </div>
+            <div class="formula-vars">
+              <div class="fv">
+                <span class="fv-sym">M</span
+                ><span class="fv-desc">Mutual inductance (Henry)</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">k</span
+                ><span class="fv-desc">Coupling factor (0 – 0.99)</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">L₁, L₂</span
+                ><span class="fv-desc">Self-inductance of each coil</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">μᵣ</span
+                ><span class="fv-desc">Relative permeability of core</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">N</span
+                ><span class="fv-desc">Number of turns</span>
+              </div>
+            </div>
+          </div>
+
+          <h3>Coupling Factor k</h3>
+          <p>
+            The coupling factor is the key composite quantity in the simulator.
+            It represents the fraction of flux from coil 1 that actually links
+            with coil 2. In the simulator, it is computed as:
+          </p>
+
+          <div class="formula-block">
+            <div class="formula-label">
+              Coupling Factor Derivation (Simulator Model)
+            </div>
+            <div class="formula-main">
+              k = k_dist · k_angle · k_shield · (0.5 + 0.5 · k_mu)
+            </div>
+            <div class="formula-vars">
+              <div class="fv">
+                <span class="fv-sym">k_dist</span
+                ><span class="fv-desc">Distance factor: 1 − (d−1)/19</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">k_angle</span
+                ><span class="fv-desc"
+                  >cos(θ) where θ is misalignment angle</span
+                >
+              </div>
+              <div class="fv">
+                <span class="fv-sym">k_shield</span
+                ><span class="fv-desc">0.3 if shielding ON, else 1.0</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">k_mu</span
+                ><span class="fv-desc"
+                  >log₁₀(μᵣ+1) / log₁₀(401), range 0–1</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <h3>Induced EMF on Secondary</h3>
+          <div class="formula-block">
+            <div class="formula-label">Secondary EMF (Simulator)</div>
+            <div class="formula-main">
+              EMF₂ = M · I₁ · N₂ · 0.06 · (1 + k_mu)
+            </div>
+            <div class="formula-vars">
+              <div class="fv">
+                <span class="fv-sym">EMF₂</span
+                ><span class="fv-desc">Induced EMF on secondary coil (V)</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">M</span
+                ><span class="fv-desc">Mutual inductance (mH)</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">I₁</span
+                ><span class="fv-desc">Primary source current (A)</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">N₂</span
+                ><span class="fv-desc">Secondary coil turns</span>
+              </div>
+            </div>
+          </div>
+
+          <h3>Secondary Circuit</h3>
+          <div class="formula-block">
+            <div class="formula-label">Secondary Current & Power</div>
+            <div class="formula-main">I₂ = EMF₂ / (R_load + R_wire)</div>
+            <div
+              class="formula-main"
+              style="
+                font-size: 15px;
+                color: var(--accent-bright);
+                margin-top: 6px;
+              "
+            >
+              P = I₂² · R_load
+            </div>
+            <div class="formula-vars">
+              <div class="fv">
+                <span class="fv-sym">I₂</span
+                ><span class="fv-desc">Secondary current (A)</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">R_load</span
+                ><span class="fv-desc">Load resistance (Ω)</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">R_wire</span
+                ><span class="fv-desc">Wire resistance / losses (Ω)</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">P</span
+                ><span class="fv-desc">Power delivered to load (W)</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- ══ SECTION 3: PRIMARY COIL FACTORS ══ -->
+        <section class="doc-section" id="primary-factors">
+          <span class="section-anchor" id="a-primary"></span>
+          <div class="section-eyebrow">Section 03</div>
+          <h2>Primary Coil Factors</h2>
+          <p>
+            The primary coil is driven by the 9V DC battery and acts as the
+            source of the changing magnetic flux. Three parameters control its
+            behaviour.
+          </p>
+
+          <h3 id="n1">N₁ — Primary Turns Count</h3>
+          <div class="factor-grid">
+            <div class="factor-card blue">
+              <div class="fc-icon">🔵</div>
+              <div class="fc-name">N₁ — Primary Turns</div>
+              <div class="fc-range">Range: 5 – 100 turns</div>
+              <div class="fc-desc">
+                The number of wire windings on the primary coil. Each additional
+                turn adds to the total magnetomotive force (MMF), producing a
+                stronger and larger magnetic flux for the same current.
+              </div>
+              <div class="fc-effect">
+                <span class="fc-up">↑ N₁</span> → Stronger B field, higher flux
+                Φ, larger M, higher EMF₂<br />
+                <span class="fc-down">↓ N₁</span> → Weaker field, lower induced
+                EMF
+              </div>
+            </div>
+          </div>
+          <p>
+            In the simulator, flux is proportional to <code>I₁ · N₁ · μᵣ</code>.
+            Mutual inductance is proportional to
+            <code>k · √(N₁ · N₂) · μᵣ</code>. Doubling N₁ therefore increases M
+            by approximately √2 ≈ 1.41×.
+          </p>
+
+          <div class="obs-block">
+            <div class="obs-title">Key Observations — N₁</div>
+            <div class="obs-row">
+              <span class="obs-key">N₁ = 5, I = 2A, d = 5cm</span
+              ><span class="obs-val acc">Low EMF</span>
+            </div>
+            <div class="obs-row">
+              <span class="obs-key">N₁ = 50, same conditions</span
+              ><span class="obs-val grn">~3× EMF increase</span>
+            </div>
+            <div class="obs-row">
+              <span class="obs-key">N₁ = 100, same conditions</span
+              ><span class="obs-val gol">Max flux — near saturation</span>
+            </div>
+          </div>
+
+          <h3 id="core-material">μᵣ — Core Material (Permeability)</h3>
+          <p>
+            The core material controls the
+            <strong>magnetic permeability</strong> of the medium around which
+            the coil is wound. A ferromagnetic core concentrates magnetic flux
+            and dramatically increases mutual inductance.
+          </p>
+
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th>Setting</th>
+                  <th>Material</th>
+                  <th>μᵣ Value</th>
+                  <th>Effect</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td><strong>Air</strong></td>
+                  <td class="mono">1</td>
+                  <td>Baseline — weakest coupling</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td><strong>Wood</strong></td>
+                  <td class="mono">2</td>
+                  <td>Slight increase in flux</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td><strong>Ferrite</strong></td>
+                  <td class="mono">10</td>
+                  <td>Common transformer core; significant improvement</td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td><strong>Iron</strong></td>
+                  <td class="mono">100</td>
+                  <td>Strong concentration of flux</td>
+                </tr>
+                <tr>
+                  <td>5</td>
+                  <td><strong>Silicon Steel</strong></td>
+                  <td class="mono">400</td>
+                  <td>Maximum coupling; used in power transformers</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout warning">
+            <div class="callout-title">Important Note</div>
+            <p>
+              In the simulator the μᵣ contribution is computed via a logarithmic
+              normalisation: <code>k_mu = log₁₀(μᵣ+1) / log₁₀(401)</code>. This
+              means the benefit of upgrading from Air to Ferrite is relatively
+              large, while the jump from Iron to Silicon Steel gives diminishing
+              returns in the coupling factor k.
+            </p>
+          </div>
+
+          <h3 id="source-current">I — Source Current</h3>
+          <p>
+            The primary source current, controlled by the
+            <strong>rheostat slider</strong>, ranges from 0.5 A to 10 A. Current
+            is the primary driver of the magnetic flux in the primary coil.
+          </p>
+
+          <div class="factor-grid">
+            <div class="factor-card blue">
+              <div class="fc-icon">⚡</div>
+              <div class="fc-name">Source Current I</div>
+              <div class="fc-range">Range: 0.5 A – 10.0 A (slider 1–20)</div>
+              <div class="fc-desc">
+                Higher current through N₁ turns creates stronger magnetic field
+                intensity H, which drives more flux through the core. Since Φ ∝
+                N·I·μᵣ, doubling current doubles flux.
+              </div>
+              <div class="fc-effect">
+                <span class="fc-up">↑ I</span> → ↑ Φ, ↑ M, ↑ EMF₂, ↑ I₂, ↑
+                Power<br />
+                <span class="fc-down">↓ I</span> → All outputs proportionally
+                reduced
+              </div>
+            </div>
+          </div>
+
+          <div class="callout info">
+            <div class="callout-title">Transformer Principle</div>
+            <p>
+              In a real transformer, primary current is set by the load on the
+              secondary. In this simulator, the primary current is an
+              independent input, simplifying the model to focus on induction
+              effects.
+            </p>
+          </div>
+        </section>
+
+        <!-- ══ SECTION 4: SECONDARY COIL FACTORS ══ -->
+        <section class="doc-section" id="secondary-factors">
+          <span class="section-anchor" id="a-secondary"></span>
+          <div class="section-eyebrow">Section 04</div>
+          <h2>Secondary Coil Factors</h2>
+          <p>
+            The secondary coil receives the induced EMF and drives current
+            through the load. Three parameters control its performance.
+          </p>
+
+          <h3 id="n2">N₂ — Secondary Turns Count</h3>
+          <p>
+            The most direct lever for controlling the induced output voltage. By
+            the transformer equation, the secondary EMF is proportional to the
+            turns ratio N₂/N₁.
+          </p>
+
+          <div class="formula-block">
+            <div class="formula-label">Transformer Turns Ratio</div>
+            <div class="formula-main">EMF₂ / EMF₁ ≈ N₂ / N₁</div>
+            <div class="formula-vars">
+              <div class="fv">
+                <span class="fv-sym">N₂ > N₁</span
+                ><span class="fv-desc"
+                  >Step-up transformer — higher output voltage</span
+                >
+              </div>
+              <div class="fv">
+                <span class="fv-sym">N₂ = N₁</span
+                ><span class="fv-desc"
+                  >Isolation transformer — same voltage, isolated</span
+                >
+              </div>
+              <div class="fv">
+                <span class="fv-sym">N₂ < N₁</span
+                ><span class="fv-desc"
+                  >Step-down transformer — lower output voltage</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <h3 id="load-resistance">R_load — Load Resistance</h3>
+          <p>
+            The external load connected to the secondary coil. It does not
+            affect the induced EMF itself, but directly controls how much
+            current flows and how much power is extracted.
+          </p>
+
+          <div class="factor-grid">
+            <div class="factor-card green">
+              <div class="fc-icon">🟢</div>
+              <div class="fc-name">Load Resistance</div>
+              <div class="fc-range">Range: 1 Ω – 100 Ω</div>
+              <div class="fc-desc">
+                The resistance of the device being powered. LED, light bulb, or
+                resistor. At low load resistance, more current flows but total
+                power depends on I²R balance.
+              </div>
+              <div class="fc-effect">
+                <span class="fc-up">↑ R_load</span> → ↓ I₂, but ↑ efficiency
+                (less wire loss fraction)<br />
+                <span class="fc-down">↓ R_load</span> → ↑ I₂, but wire losses
+                become larger fraction
+              </div>
+            </div>
+          </div>
+
+          <div class="callout success">
+            <div class="callout-title">Optimal Loading</div>
+            <p>
+              Maximum power is transferred when
+              <code>R_load = R_wire</code> (maximum power transfer theorem). At
+              this point efficiency is exactly 50%. For high efficiency, R_load
+              should be much greater than R_wire.
+            </p>
+          </div>
+
+          <h3 id="wire-resistance">R_wire — Wire Resistance (Losses)</h3>
+          <p>
+            Represents the intrinsic resistance of the coil winding wire. This
+            is the main source of power loss in the secondary circuit and
+            reduces efficiency.
+          </p>
+
+          <div class="obs-block">
+            <div class="obs-title">Wire Resistance Effect on Efficiency</div>
+            <div class="obs-row">
+              <span class="obs-key">R_wire = 0.1 Ω, R_load = 10 Ω</span
+              ><span class="obs-val grn">~99% efficiency</span>
+            </div>
+            <div class="obs-row">
+              <span class="obs-key">R_wire = 1 Ω, R_load = 10 Ω</span
+              ><span class="obs-val acc">~91% efficiency</span>
+            </div>
+            <div class="obs-row">
+              <span class="obs-key">R_wire = 5 Ω, R_load = 10 Ω</span
+              ><span class="obs-val gol">~67% efficiency</span>
+            </div>
+            <div class="obs-row">
+              <span class="obs-key">R_wire = 10 Ω, R_load = 10 Ω</span
+              ><span class="obs-val grn">~50% (max power transfer)</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══ SECTION 5: GEOMETRY ══ -->
+        <section class="doc-section" id="geometry-factors">
+          <span class="section-anchor" id="a-geometry"></span>
+          <div class="section-eyebrow">Section 05</div>
+          <h2>Geometry Factors</h2>
+          <p>
+            Physical positioning and orientation of the two coils relative to
+            each other profoundly affects how much magnetic flux links the
+            secondary. These are the most spatially intuitive factors in the
+            experiment.
+          </p>
+
+          <h3 id="separation">d — Coil Separation</h3>
+          <p>
+            Distance between the two coils measured in centimetres. Magnetic
+            field intensity falls with distance, so the flux linkage drops
+            sharply as coils are moved apart.
+          </p>
+
+          <div class="factor-grid">
+            <div class="factor-card red">
+              <div class="fc-icon">📏</div>
+              <div class="fc-name">Coil Separation</div>
+              <div class="fc-range">Range: 1 cm – 20 cm</div>
+              <div class="fc-desc">
+                In the simulator, the distance factor is modelled as a linear
+                decrease: <code>k_dist = 1 − (d−1)/19</code>. In real life, the
+                falloff is approximately proportional to 1/d³ for coils far from
+                each other.
+              </div>
+              <div class="fc-effect">
+                <span class="fc-up">↑ Distance</span> → ↓ k_dist → ↓ k → ↓ M → ↓
+                EMF<br />
+                <span class="fc-down">d = 1 cm</span> → Maximum coupling (k_dist
+                = 1.0)
+              </div>
+            </div>
+          </div>
+
+          <div class="callout warning">
+            <div class="callout-title">Real vs. Simulated Falloff</div>
+            <p>
+              In the simulator, a linear falloff model is used for simplicity.
+              In reality, the flux linkage between two coaxial coils follows a
+              more complex relationship dependent on coil radii and geometry.
+              For closely coupled toroidal transformers, distance is nearly zero
+              and k approaches 0.99.
+            </p>
+          </div>
+
+          <h3 id="alignment">θ — Coil Alignment Angle</h3>
+          <p>
+            The angle of misalignment between the two coil axes. When both coils
+            are coaxial (0°), maximum flux linkage occurs. As the angle
+            increases toward 90°, the axes become perpendicular and flux linkage
+            drops to zero.
+          </p>
+
+          <div class="formula-block">
+            <div class="formula-label">Angle Factor</div>
+            <div class="formula-main">k_angle = cos(θ)</div>
+            <div class="formula-vars">
+              <div class="fv">
+                <span class="fv-sym">θ = 0°</span
+                ><span class="fv-desc">cos(0°) = 1.0 — perfect alignment</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">θ = 45°</span
+                ><span class="fv-desc">cos(45°) = 0.707 — 30% flux loss</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">θ = 60°</span
+                ><span class="fv-desc">cos(60°) = 0.5 — 50% flux loss</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">θ = 90°</span
+                ><span class="fv-desc">cos(90°) = 0.0 — zero coupling</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th>Angle θ</th>
+                  <th>k_angle</th>
+                  <th>Flux Linkage %</th>
+                  <th>Effect on EMF</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>0°</td>
+                  <td class="green">1.000</td>
+                  <td class="green">100%</td>
+                  <td>Full induction</td>
+                </tr>
+                <tr>
+                  <td>15°</td>
+                  <td class="mono">0.966</td>
+                  <td class="mono">96.6%</td>
+                  <td>Negligible loss</td>
+                </tr>
+                <tr>
+                  <td>30°</td>
+                  <td class="mono">0.866</td>
+                  <td class="mono">86.6%</td>
+                  <td>Minor loss</td>
+                </tr>
+                <tr>
+                  <td>45°</td>
+                  <td class="gold">0.707</td>
+                  <td class="gold">70.7%</td>
+                  <td>Significant reduction</td>
+                </tr>
+                <tr>
+                  <td>60°</td>
+                  <td class="red">0.500</td>
+                  <td class="red">50.0%</td>
+                  <td>Half of maximum</td>
+                </tr>
+                <tr>
+                  <td>90°</td>
+                  <td class="red">0.000</td>
+                  <td class="red">0%</td>
+                  <td>Zero induction</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- ══ SECTION 6: SOURCE MODES ══ -->
+        <section class="doc-section" id="modes">
+          <span class="section-anchor" id="a-modes"></span>
+          <div class="section-eyebrow">Section 06</div>
+          <h2>Source Modes</h2>
+          <p>
+            Three special modes modify the behaviour of the primary source
+            circuit, each demonstrating a different physical principle.
+          </p>
+
+          <h3 id="ac-mode">AC / Continuous Mode</h3>
+          <p>
+            When AC mode is toggled on, the primary source becomes an
+            <strong>alternating current</strong> supply. This means the magnetic
+            flux is continuously changing (sinusoidally), which induces a
+            continuous EMF in the secondary coil — even without switching the
+            circuit on and off.
+          </p>
+          <p>
+            This is the fundamental operating principle of all real-world
+            transformers. A DC source only induces EMF at the moment of
+            switching; an AC source induces EMF continuously.
+          </p>
+
+          <div class="obs-block">
+            <div class="obs-title">DC vs AC Induction</div>
+            <div class="obs-row">
+              <span class="obs-key">DC — Switch closed (steady state)</span
+              ><span class="obs-val acc">EMF = 0 (no flux change)</span>
+            </div>
+            <div class="obs-row">
+              <span class="obs-key">DC — At moment of switching</span
+              ><span class="obs-val gol">Brief EMF pulse</span>
+            </div>
+            <div class="obs-row">
+              <span class="obs-key">AC — Continuous</span
+              ><span class="obs-val grn">Continuous EMF output</span>
+            </div>
+          </div>
+
+          <div class="callout info">
+            <div class="callout-title">Simulator Behaviour</div>
+            <p>
+              In AC mode, the field line animation frequency increases
+              (multiplied by 3 vs 1.5 in DC), visually representing the higher
+              rate of flux change. The badge shows "LIVE" and all output metrics
+              are active regardless of switch state.
+            </p>
+          </div>
+
+          <h3 id="reverse-polarity">Reverse Polarity</h3>
+          <p>
+            Reverses the direction of current flow in the primary coil. This
+            flips the orientation of the magnetic field (B field) and
+            consequently reverses the direction of the induced EMF in the
+            secondary (Lenz's Law).
+          </p>
+          <p>
+            In the simulator, this is visually indicated by the wire colour
+            changing from
+            <span style="color: var(--accent-bright)">blue (normal)</span> to
+            <span style="color: var(--gold-bright)">gold (reversed)</span>. The
+            LED blinks in reverse polarity mode to indicate alternating polarity
+            output.
+          </p>
+
+          <div class="factor-grid">
+            <div class="factor-card gold">
+              <div class="fc-icon">⇄</div>
+              <div class="fc-name">Reverse Polarity</div>
+              <div class="fc-range">Toggle: ON / OFF</div>
+              <div class="fc-desc">
+                Flips the sign of the induced EMF. Wire colours turn gold. LED
+                output blinks at 7 Hz. Combined with AC mode, this simulates
+                rapid polarity alternation — key to understanding full-wave
+                rectification.
+              </div>
+              <div class="fc-effect">
+                <span class="fc-varies">Effect:</span> EMF magnitude unchanged,
+                direction reversed<br />
+                <span class="fc-varies">LED:</span> Blinks at sin(t·7) > 0
+                cadence
+              </div>
+            </div>
+          </div>
+
+          <h3 id="shielding">Magnetic Shielding</h3>
+          <p>
+            A magnetic shield is a material that redirects or absorbs magnetic
+            flux, preventing it from reaching the secondary coil. This is used
+            in sensitive electronics to prevent interference (EMI shielding).
+          </p>
+
+          <div class="formula-block">
+            <div class="formula-label">Shielding Effect</div>
+            <div class="formula-main">k_shield = 0.3 (when shield ON)</div>
+            <div
+              class="formula-main"
+              style="
+                font-size: 14px;
+                color: var(--accent-bright);
+                margin-top: 6px;
+              "
+            >
+              k_shield = 1.0 (when shield OFF)
+            </div>
+            <div class="formula-vars">
+              <div class="fv">
+                <span class="fv-sym">Reduction</span
+                ><span class="fv-desc"
+                  >70% of coupling is blocked when shielding is active</span
+                >
+              </div>
+              <div class="fv">
+                <span class="fv-sym">Application</span
+                ><span class="fv-desc"
+                  >Mu-metal shielding in real lab equipment</span
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══ SECTION 7: COMPUTED OUTPUTS ══ -->
+        <section class="doc-section" id="computed-outputs">
+          <span class="section-anchor" id="a-outputs"></span>
+          <div class="section-eyebrow">Section 07</div>
+          <h2>Computed Output Metrics</h2>
+          <p>
+            The simulator computes 8 live quantities in real time as any input
+            parameter changes. All values update immediately on slider movement.
+          </p>
+
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th>Symbol</th>
+                  <th>Unit</th>
+                  <th>Formula Used</th>
+                  <th>Max Reference</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Induced EMF</strong></td>
+                  <td class="mono">EMF₂</td>
+                  <td class="mono">V</td>
+                  <td>M · I₁ · N₂ · 0.06 · (1 + k_mu)</td>
+                  <td class="gold">~20 V</td>
+                </tr>
+                <tr>
+                  <td><strong>Mutual Inductance</strong></td>
+                  <td class="mono">M</td>
+                  <td class="mono">mH</td>
+                  <td>k · √(N₁ · N₂) · μᵣ · 0.05</td>
+                  <td class="gold">~10 mH</td>
+                </tr>
+                <tr>
+                  <td><strong>Magnetic Flux</strong></td>
+                  <td class="mono">Φ</td>
+                  <td class="mono">mWb</td>
+                  <td>I₁ · N₁ · μᵣ · k_dist · k_angle · k_shield · 0.04</td>
+                  <td class="gold">~5 mWb</td>
+                </tr>
+                <tr>
+                  <td><strong>Coupling Factor</strong></td>
+                  <td class="mono">k</td>
+                  <td class="mono">—</td>
+                  <td>k_dist · k_angle · k_shield · (0.5 + 0.5·k_mu)</td>
+                  <td class="gold">0 – 0.99</td>
+                </tr>
+                <tr>
+                  <td><strong>Secondary Current</strong></td>
+                  <td class="mono">I₂</td>
+                  <td class="mono">A</td>
+                  <td>EMF₂ / (R_load + R_wire)</td>
+                  <td class="gold">~2 A</td>
+                </tr>
+                <tr>
+                  <td><strong>Power Transfer</strong></td>
+                  <td class="mono">P</td>
+                  <td class="mono">W</td>
+                  <td>I₂² · R_load</td>
+                  <td class="gold">~10 W</td>
+                </tr>
+                <tr>
+                  <td><strong>Turns Ratio</strong></td>
+                  <td class="mono">n</td>
+                  <td class="mono">—</td>
+                  <td>N₂ / N₁</td>
+                  <td class="gold">0.05 – 20</td>
+                </tr>
+                <tr>
+                  <td><strong>Efficiency η</strong></td>
+                  <td class="mono">η</td>
+                  <td class="mono">%</td>
+                  <td>P_out / P_in × 100</td>
+                  <td class="gold">0 – 99%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Efficiency Calculation</h3>
+          <p>
+            The efficiency is computed as the ratio of output power (power in
+            the load) to input power consumed by the primary circuit:
+          </p>
+          <div class="formula-block">
+            <div class="formula-label">Efficiency</div>
+            <div class="formula-main">
+              η = (I₂² · R_load) / (I₁² · R_internal) × 100%
+            </div>
+            <div class="formula-vars">
+              <div class="fv">
+                <span class="fv-sym">R_internal</span
+                ><span class="fv-desc"
+                  >Fixed at 2.0 Ω in the primary model</span
+                >
+              </div>
+              <div class="fv">
+                <span class="fv-sym">η max</span
+                ><span class="fv-desc"
+                  >Capped at 99% to reflect real losses</span
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══ SECTION 8: LED INDICATOR ══ -->
+        <section class="doc-section" id="led-indicator">
+          <span class="section-anchor" id="a-led"></span>
+          <div class="section-eyebrow">Section 08</div>
+          <h2>LED Output Indicator</h2>
+          <p>
+            The LED is the visible output device connected across the secondary
+            circuit. It serves as both a qualitative and quantitative indicator
+            of the induced EMF and power transfer. A real LED requires a minimum
+            forward voltage (~1.7–2.0 V) to conduct and emit light.
+          </p>
+
+          <div class="formula-block">
+            <div class="formula-label">LED Brightness Model</div>
+            <div class="formula-main">LED% = min(100, EMF₂ × 7)</div>
+            <div class="formula-vars">
+              <div class="fv">
+                <span class="fv-sym">Threshold</span
+                ><span class="fv-desc"
+                  >LED turns ON when LED% > 8 (~EMF₂ > 1.14 V)</span
+                >
+              </div>
+              <div class="fv">
+                <span class="fv-sym">Full bright</span
+                ><span class="fv-desc">LED% = 100 when EMF₂ ≥ 14.3 V</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">Blink mode</span
+                ><span class="fv-desc">Active when Reverse Polarity is ON</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th>LED State</th>
+                  <th>LED%</th>
+                  <th>Approximate EMF₂</th>
+                  <th>Visual</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>NO OUTPUT</td>
+                  <td class="red">0 – 8%</td>
+                  <td class="red">< 1.1 V</td>
+                  <td>Dark dome</td>
+                </tr>
+                <tr>
+                  <td>FAINT GLOW</td>
+                  <td class="mono">8 – 30%</td>
+                  <td class="mono">1.1 – 4.3 V</td>
+                  <td>Dim orange</td>
+                </tr>
+                <tr>
+                  <td>MEDIUM GLOW</td>
+                  <td class="gold">30 – 70%</td>
+                  <td class="gold">4.3 – 10 V</td>
+                  <td>Orange glow</td>
+                </tr>
+                <tr>
+                  <td>BRIGHT</td>
+                  <td class="green">70 – 100%</td>
+                  <td class="green">> 10 V</td>
+                  <td>Bright white-orange with halo</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- ══ SECTION 9: FINDINGS ══ -->
+        <section class="doc-section" id="findings">
+          <span class="section-anchor" id="a-findings"></span>
+          <div class="section-eyebrow">Section 09</div>
+          <h2>Experimental Findings</h2>
+          <p>
+            Based on systematic variation of all input parameters, the following
+            findings summarise the behaviour of the mutual induction system.
+          </p>
+
+          <h3>Key Findings — Factor Sensitivity</h3>
+
+          <div class="finding-row">
+            <div class="finding-num">01</div>
+            <div class="finding-content">
+              <h4>Core Material Has the Highest Single-Factor Impact</h4>
+              <p>
+                Switching from Air (μᵣ=1) to Silicon Steel (μᵣ=400) with all
+                other factors constant increases the induced EMF by
+                approximately <strong>4–5×</strong>. No other single parameter
+                change produces this magnitude of improvement. This explains why
+                virtually all commercial transformers use ferromagnetic cores.
+              </p>
+            </div>
+          </div>
+
+          <div class="finding-row">
+            <div class="finding-num">02</div>
+            <div class="finding-content">
+              <h4>Distance is the Most Rapidly Degrading Factor</h4>
+              <p>
+                Increasing coil separation from 1 cm to 10 cm (half range)
+                reduces the distance factor from 1.0 to ~0.53. In a real
+                solenoid pair, this effect is even more severe (cubic falloff).
+                Keeping coils close together is essential for high coupling.
+              </p>
+            </div>
+          </div>
+
+          <div class="finding-row">
+            <div class="finding-num">03</div>
+            <div class="finding-content">
+              <h4>
+                Turns Ratio Controls Output Voltage Independently of Source
+              </h4>
+              <p>
+                With a fixed primary setup, varying N₂ from 5 to 100 scales the
+                output EMF nearly linearly with N₂. This confirms the
+                transformer turns ratio principle: <code>V₂/V₁ ≈ N₂/N₁</code>.
+                Setting N₂ = 2·N₁ doubles the output voltage (step-up
+                configuration).
+              </p>
+            </div>
+          </div>
+
+          <div class="finding-row">
+            <div class="finding-num">04</div>
+            <div class="finding-content">
+              <h4>Misalignment at 45° Causes ~30% Output Loss</h4>
+              <p>
+                Since k_angle = cos(θ), a 45° misalignment reduces flux linkage
+                to 70.7% of maximum. At 60° this drops to 50%. This finding
+                demonstrates why real inductive chargers (Qi charging pads) are
+                sensitive to device placement angle.
+              </p>
+            </div>
+          </div>
+
+          <div class="finding-row">
+            <div class="finding-num">05</div>
+            <div class="finding-content">
+              <h4>
+                Wire Resistance Disproportionately Affects Efficiency at Low
+                Loads
+              </h4>
+              <p>
+                At R_load = 1 Ω and R_wire = 2 Ω, only 25% of output power
+                reaches the load. At R_load = 100 Ω and R_wire = 2 Ω, over 98%
+                efficiency is achieved. This confirms that impedance matching
+                and minimising winding resistance are critical engineering
+                goals.
+              </p>
+            </div>
+          </div>
+
+          <div class="finding-row">
+            <div class="finding-num">06</div>
+            <div class="finding-content">
+              <h4>
+                Combined Factor Optimisation Yields Maximum LED Brightness
+              </h4>
+              <p>
+                Peak LED output (100%) is achieved at:
+                <strong
+                  >N₁=100, N₂=100, μᵣ=400 (Silicon Steel), I=10A, d=1cm, θ=0°,
+                  No Shield, R_load=1Ω, R_wire=0.1Ω</strong
+                >. This represents ideal transformer conditions. Any single
+                factor degradation noticeably reduces the LED output.
+              </p>
+            </div>
+          </div>
+
+          <div class="finding-row">
+            <div class="finding-num">07</div>
+            <div class="finding-content">
+              <h4>Shielding Reduces Coupling by 70%</h4>
+              <p>
+                Enabling magnetic shielding forces k_shield = 0.3, meaning only
+                30% of the normal coupling remains. This is a strong
+                demonstration of EMI shielding principles used in sensitive
+                electronics, MRI machines, and military avionics.
+              </p>
+            </div>
+          </div>
+
+          <h3>Comparative Findings Table</h3>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th>Experiment</th>
+                  <th>Condition Changed</th>
+                  <th>EMF Change</th>
+                  <th>k Change</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Air → Silicon Steel core</td>
+                  <td class="gold">μᵣ: 1 → 400</td>
+                  <td class="green">+350–450%</td>
+                  <td class="green">k nearly doubled</td>
+                </tr>
+                <tr>
+                  <td>1 cm → 20 cm separation</td>
+                  <td class="red">d: 1 → 20 cm</td>
+                  <td class="red">−100% (near zero)</td>
+                  <td class="red">k → ~0</td>
+                </tr>
+                <tr>
+                  <td>0° → 90° misalignment</td>
+                  <td class="red">θ: 0 → 90°</td>
+                  <td class="red">−100%</td>
+                  <td class="red">k → 0</td>
+                </tr>
+                <tr>
+                  <td>N₁: 20 → 100, N₂ fixed</td>
+                  <td class="mono">N₁: 20 → 100</td>
+                  <td class="green">+~2.2× (√5 factor)</td>
+                  <td class="green">+~2.2×</td>
+                </tr>
+                <tr>
+                  <td>N₂: 20 → 100, N₁ fixed</td>
+                  <td class="mono">N₂: 20 → 100</td>
+                  <td class="green">+~5× (linear)</td>
+                  <td class="mono">Unchanged</td>
+                </tr>
+                <tr>
+                  <td>Shield OFF → ON</td>
+                  <td class="red">Shield: ON</td>
+                  <td class="red">−70%</td>
+                  <td class="red">k × 0.3</td>
+                </tr>
+                <tr>
+                  <td>I: 2A → 10A</td>
+                  <td class="mono">Current: 2 → 10 A</td>
+                  <td class="green">+5× (linear)</td>
+                  <td class="mono">Unchanged</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ══ SECTION 10: PRACTICAL ══ -->
+        <section class="doc-section" id="practical">
+          <span class="section-anchor" id="a-practical"></span>
+          <div class="section-eyebrow">Section 10</div>
+          <h2>Practical Outreach</h2>
+          <p>
+            The simulator bridges abstract electromagnetic theory with hands-on
+            understanding. Here is guidance for practical use across different
+            educational contexts.
+          </p>
+
+          <h3>For Physics / Electrical Engineering Courses</h3>
+          <p>Use the simulator as a companion to:</p>
+
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <h4>Verify Faraday's Law Qualitatively</h4>
+                <p>
+                  Turn on AC mode and vary the primary current slider. Observe
+                  that higher rate-of-change (higher current magnitude)
+                  increases the induced EMF — directly demonstrating that EMF ∝
+                  dΦ/dt.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <h4>Investigate the Transformer Equation</h4>
+                <p>
+                  Keep N₁ constant and vary N₂ from 5 to 100. Record the EMF
+                  output at each step. Plot EMF vs N₂. The result should be
+                  linear, confirming V₂ ∝ N₂.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-content">
+                <h4>Demonstrate the Role of Core Material</h4>
+                <p>
+                  Cycle through all 5 core materials with all other parameters
+                  fixed. Record M and EMF at each step. This clearly shows why
+                  transformer manufacturers use silicon steel rather than air
+                  cores.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">4</div>
+              <div class="step-content">
+                <h4>Explore Maximum Power Transfer</h4>
+                <p>
+                  Fix all other parameters. Vary R_load from 1 to 100 Ω and
+                  record output power. Plot P vs R_load. Identify the load where
+                  power is maximised (when R_load ≈ R_wire).
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">5</div>
+              <div class="step-content">
+                <h4>Model Wireless Charging (Qi)</h4>
+                <p>
+                  Set d = 2 cm, θ = 0°, AC mode, medium turns, ferrite core.
+                  This approximates a wireless phone charging pad. Then increase
+                  θ to simulate the phone being placed off-centre — watch the
+                  coupling and EMF drop.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══ SECTION 11: REAL-WORLD ══ -->
+        <section class="doc-section" id="real-world">
+          <span class="section-anchor" id="a-realworld"></span>
+          <div class="section-eyebrow">Section 11</div>
+          <h2>Real-World Applications</h2>
+          <p>
+            The mutual induction principle demonstrated in this simulator
+            underlies a vast range of modern technologies.
+          </p>
+
+          <div class="factor-grid">
+            <div class="factor-card gold">
+              <div class="fc-icon">🔌</div>
+              <div class="fc-name">Power Transformers</div>
+              <div class="fc-desc">
+                AC power grids step voltage up for transmission (reducing I²R
+                losses) and step down for household use. Silicon steel cores,
+                thousands of turns, k ≈ 0.98–0.99.
+              </div>
+            </div>
+            <div class="factor-card blue">
+              <div class="fc-icon">📱</div>
+              <div class="fc-name">Wireless Charging (Qi)</div>
+              <div class="fc-desc">
+                Two tightly coupled coils at 1–5 mm distance. Ferrite shields
+                prevent radiation into the device. Operates at 100–350 kHz.
+                Misalignment sensitivity demonstrable directly in simulator.
+              </div>
+            </div>
+            <div class="factor-card green">
+              <div class="fc-icon">🏥</div>
+              <div class="fc-name">MRI Machines</div>
+              <div class="fc-desc">
+                Radiofrequency coils induce signals in body tissue.
+                Superconducting primaries create enormous B fields. Mu-metal
+                shielding (like simulator shield mode) isolates the patient
+                volume.
+              </div>
+            </div>
+            <div class="factor-card copper">
+              <div class="fc-icon">📡</div>
+              <div class="fc-name">RFID & NFC</div>
+              <div class="fc-desc">
+                Passive RFID tags have no battery. The reader coil induces
+                enough EMF (via tight coupling at very close range) to power the
+                tag's chip and transmit a response. Exactly this simulator's
+                model.
+              </div>
+            </div>
+            <div class="factor-card red">
+              <div class="fc-icon">🚗</div>
+              <div class="fc-name">EV Inductive Charging</div>
+              <div class="fc-desc">
+                Floor-mounted primary coil charges a car's battery via a
+                secondary coil in the vehicle floor. Operating at 85 kHz, k ≈
+                0.7–0.9. Distance and alignment are critical — matching the
+                simulator parameters exactly.
+              </div>
+            </div>
+            <div class="factor-card blue">
+              <div class="fc-icon">⚙️</div>
+              <div class="fc-name">Induction Motors</div>
+              <div class="fc-desc">
+                The stator acts as the primary, inducing currents in the
+                squirrel-cage rotor (secondary). The interaction of induced
+                currents and the rotating field produces torque. Mutual
+                inductance drives the entire machine.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══ SECTION 12: LAB EXERCISES ══ -->
+        <section class="doc-section" id="lab-exercises">
+          <span class="section-anchor" id="a-lab"></span>
+          <div class="section-eyebrow">Section 12</div>
+          <h2>Suggested Lab Exercises</h2>
+
+          <h3>Exercise 1 — Transformer Step-Up Ratio</h3>
+          <div class="obs-block">
+            <div class="obs-title">Procedure</div>
+            <div class="obs-row">
+              <span class="obs-key"
+                >Set N₁ = 20, N₂ = 20, μᵣ = Iron, I = 5A, d = 3cm, θ = 0°</span
+              ><span class="obs-val acc">Baseline</span>
+            </div>
+            <div class="obs-row">
+              <span class="obs-key"
+                >Record EMF₂ at N₂ = 20, 40, 60, 80, 100</span
+              ><span class="obs-val gol">5 data points</span>
+            </div>
+            <div class="obs-row">
+              <span class="obs-key">Plot EMF₂ vs N₂</span
+              ><span class="obs-val grn">Expect linear</span>
+            </div>
+            <div class="obs-row">
+              <span class="obs-key"
+                >Calculate slope = EMF₂/N₂ and compare to N₁ ratio</span
+              ><span class="obs-val acc">Confirm V₂/V₁ = N₂/N₁</span>
+            </div>
+          </div>
+
+          <h3>Exercise 2 — Coupling Factor vs Distance</h3>
+          <div class="obs-block">
+            <div class="obs-title">Procedure</div>
+            <div class="obs-row">
+              <span class="obs-key"
+                >N₁=N₂=50, Silicon Steel, I=8A, θ=0°, No shield</span
+              ><span class="obs-val acc">Setup</span>
+            </div>
+            <div class="obs-row">
+              <span class="obs-key">Vary d: 1, 3, 5, 8, 10, 15, 20 cm</span
+              ><span class="obs-val gol">7 data points</span>
+            </div>
+            <div class="obs-row">
+              <span class="obs-key">Record k and EMF at each distance</span
+              ><span class="obs-val grn">Log data</span>
+            </div>
+            <div class="obs-row">
+              <span class="obs-key"
+                >Plot k vs d — observe linear decay in simulator vs real
+                cubic</span
+              ><span class="obs-val acc">Compare models</span>
+            </div>
+          </div>
+
+          <h3>Exercise 3 — Efficiency Optimisation</h3>
+          <div class="obs-block">
+            <div class="obs-title">Procedure</div>
+            <div class="obs-row">
+              <span class="obs-key">Fix: N₁=50, N₂=50, Iron, I=5A, d=3cm</span
+              ><span class="obs-val acc">Setup</span>
+            </div>
+            <div class="obs-row">
+              <span class="obs-key">Set R_wire = 2Ω. Vary R_load: 1–100 Ω</span
+              ><span class="obs-val gol">Record P, I₂, η</span>
+            </div>
+            <div class="obs-row">
+              <span class="obs-key">Find R_load that gives maximum P</span
+              ><span class="obs-val grn">Should be near R_wire</span>
+            </div>
+            <div class="obs-row">
+              <span class="obs-key">Find R_load that gives maximum η</span
+              ><span class="obs-val acc">Will be much larger than R_wire</span>
+            </div>
+          </div>
+
+          <h3>Exercise 4 — Core Material Comparison</h3>
+          <div class="obs-block">
+            <div class="obs-title">Procedure</div>
+            <div class="obs-row">
+              <span class="obs-key"
+                >N₁=N₂=40, I=5A, d=5cm, θ=0°, R_load=10Ω</span
+              ><span class="obs-val acc">Setup</span>
+            </div>
+            <div class="obs-row">
+              <span class="obs-key"
+                >Record M, EMF₂, k for each of 5 core materials</span
+              ><span class="obs-val gol">5 data points</span>
+            </div>
+            <div class="obs-row">
+              <span class="obs-key">Plot M vs μᵣ on log scale</span
+              ><span class="obs-val grn">Identify trend</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══ SECTION 13: FARADAY ══ -->
+        <section class="doc-section" id="faraday">
+          <span class="section-anchor" id="a-faraday"></span>
+          <div class="section-eyebrow">Section 13</div>
+          <h2>Faraday's Law — Historical Context</h2>
+
+          <div class="callout success">
+            <div class="callout-title">Historical Milestone — 1831</div>
+            <p>
+              <strong>Michael Faraday</strong> (1791–1867) was a British
+              experimental physicist who discovered electromagnetic induction on
+              <strong>August 29, 1831</strong>. By wrapping two coils of wire
+              around an iron ring and connecting one to a battery and the other
+              to a galvanometer, he observed that the galvanometer needle
+              deflected only at the moments of making or breaking the battery
+              circuit — exactly DC switching induction as simulated here.
+            </p>
+          </div>
+
+          <p>
+            Faraday's quantitative law was later formalised by James Clerk
+            Maxwell as one of the four Maxwell's Equations:
+          </p>
+
+          <div class="formula-block">
+            <div class="formula-label">
+              Maxwell–Faraday Equation (Integral Form)
+            </div>
+            <div class="formula-main">∮ E · dl = − d/dt ∫∫ B · dA</div>
+            <div class="formula-vars">
+              <div class="fv">
+                <span class="fv-sym">E</span
+                ><span class="fv-desc">Electric field (V/m)</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">B</span
+                ><span class="fv-desc">Magnetic flux density (Tesla)</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">∮</span
+                ><span class="fv-desc">Line integral around closed loop</span>
+              </div>
+              <div class="fv">
+                <span class="fv-sym">∫∫</span
+                ><span class="fv-desc"
+                  >Surface integral through the loop area</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <p>
+            Faraday also discovered <strong>Lenz's Law</strong> (the negative
+            sign in Faraday's law): the induced current always flows in a
+            direction that opposes the change in flux that caused it. This is
+            why the LED blinks when polarity is reversed — the secondary opposes
+            the reversal.
+          </p>
+        </section>
+
+        <!-- ══ SECTION 14: LIMITATIONS ══ -->
+        <section class="doc-section" id="limitations">
+          <span class="section-anchor" id="a-limits"></span>
+          <div class="section-eyebrow">Section 14</div>
+          <h2>Simulator Limitations & Notes</h2>
+
+          <div class="callout warning">
+            <div class="callout-title">Simplified Physics Model</div>
+            <p>
+              The simulator uses a dimensionally consistent but simplified
+              model. Several real-world effects are not modelled: hysteresis
+              losses, eddy current losses, skin effect, self-capacitance of
+              coils, saturation of ferromagnetic cores, temperature effects on
+              resistance, and near-field radiation.
+            </p>
+          </div>
+
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th>Aspect</th>
+                  <th>Simulator Model</th>
+                  <th>Real-World Behaviour</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Distance falloff</strong></td>
+                  <td>Linear (1 − d/19)</td>
+                  <td>Approximately 1/d³ for point sources</td>
+                </tr>
+                <tr>
+                  <td><strong>Core permeability</strong></td>
+                  <td>Log-normalised</td>
+                  <td>Nonlinear, temperature-dependent, hysteretic</td>
+                </tr>
+                <tr>
+                  <td><strong>EMF magnitude</strong></td>
+                  <td>Proportional model (× 0.06)</td>
+                  <td>Requires coil geometry, dI/dt, exact flux</td>
+                </tr>
+                <tr>
+                  <td><strong>Efficiency cap</strong></td>
+                  <td>Hard cap at 99%</td>
+                  <td>Modern power transformers reach 98–99.5%</td>
+                </tr>
+                <tr>
+                  <td><strong>AC frequency</strong></td>
+                  <td>Visual only (animation)</td>
+                  <td>50/60 Hz; frequency affects losses significantly</td>
+                </tr>
+                <tr>
+                  <td><strong>Load interaction</strong></td>
+                  <td>No back-EMF from load</td>
+                  <td>Heavy loading reduces primary flux (real transformer)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ══ SECTION 15: GLOSSARY ══ -->
+        <section class="doc-section" id="glossary">
+          <span class="section-anchor" id="a-glossary"></span>
+          <div class="section-eyebrow">Section 15</div>
+          <h2>Glossary of Terms</h2>
+
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th>Term</th>
+                  <th>Symbol</th>
+                  <th>Definition</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>EMF</strong></td>
+                  <td class="mono">ε, V</td>
+                  <td>
+                    Electromotive Force — the voltage induced by a changing
+                    magnetic flux. Measured in Volts.
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Magnetic Flux</strong></td>
+                  <td class="mono">Φ</td>
+                  <td>
+                    The total magnetic field B passing through a surface.
+                    Measured in Webers (Wb).
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Flux Density</strong></td>
+                  <td class="mono">B</td>
+                  <td>
+                    Magnetic flux per unit area. B = Φ/A. Measured in Tesla (T).
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Mutual Inductance</strong></td>
+                  <td class="mono">M</td>
+                  <td>
+                    A quantity describing how efficiently one coil induces EMF
+                    in another. Measured in Henrys (H).
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Coupling Factor</strong></td>
+                  <td class="mono">k</td>
+                  <td>
+                    Dimensionless ratio (0–1) indicating what fraction of flux
+                    from the primary links with the secondary.
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Permeability</strong></td>
+                  <td class="mono">μᵣ</td>
+                  <td>
+                    Ratio of a material's magnetic permeability to that of free
+                    space. Air = 1, Silicon Steel ≈ 400.
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Turns Ratio</strong></td>
+                  <td class="mono">n</td>
+                  <td>
+                    Ratio N₂/N₁. Determines step-up (n>1), isolation (n=1), or
+                    step-down (n<1) transformer function.
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Lenz's Law</strong></td>
+                  <td class="mono">−</td>
+                  <td>
+                    The induced current opposes the change in flux that caused
+                    it. Accounts for the negative sign in Faraday's Law.
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Faraday's Law</strong></td>
+                  <td class="mono">ε=−NdΦ/dt</td>
+                  <td>
+                    Induced EMF equals the negative rate of change of magnetic
+                    flux linkage with the circuit.
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Solenoid</strong></td>
+                  <td class="mono">—</td>
+                  <td>
+                    A coil of wire wound around a cylindrical core. Forms the
+                    basis of the primary and secondary coils.
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Rheostat</strong></td>
+                  <td class="mono">—</td>
+                  <td>
+                    A variable resistor used to control the current through the
+                    primary coil. Modelled by the current slider.
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>MMF</strong></td>
+                  <td class="mono">F = N·I</td>
+                  <td>
+                    Magnetomotive Force — the "driving force" for magnetic flux.
+                    Product of current and turns.
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Efficiency</strong></td>
+                  <td class="mono">η</td>
+                  <td>
+                    Ratio of output power to input power, expressed as a
+                    percentage. Losses reduce η below 100%.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout info" style="margin-top: 32px">
+            <div class="callout-title">References</div>
+            <p>
+              This simulator is based on: Griffiths,
+              <em>Introduction to Electrodynamics</em> (4th Ed.); Hayt & Buck,
+              <em>Engineering Electromagnetics</em> (8th Ed.); Faraday's
+              original 1831 papers (Royal Institution archives); and Neumann's
+              1845 formula for mutual inductance between arbitrary current
+              loops.
+            </p>
+          </div>
+        </section>
+
+        <!-- Footer -->
+        <div
+          style="
+            margin-top: 60px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+          "
+        >
+          <div>
+            <div
+              style="
+                font-family: &quot;Syne&quot;, sans-serif;
+                font-size: 13px;
+                font-weight: 700;
+                color: #fff;
+              "
+            >
+              Mutual Induction Lab — Technical Documentation
+            </div>
+            <div
+              style="
+                font-family: &quot;JetBrains Mono&quot;, monospace;
+                font-size: 9px;
+                letter-spacing: 2px;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                margin-top: 4px;
+              "
+            >
+              Version 2.0 · Electromagnetic Induction Simulator · Physics Lab
+              Series
+            </div>
+          </div>
+          <div
+            style="
+              font-family: &quot;JetBrains Mono&quot;, monospace;
+              font-size: 9px;
+              color: var(--text-muted);
+              letter-spacing: 1px;
+            "
+          >
+            Generated for NED University · EECE / Physics Dept.
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // Sidebar active tracking
+      const navItems = document.querySelectorAll(".nav-item");
+      const sections = document.querySelectorAll(".doc-section");
+
+      function updateActiveNav() {
+        let current = "";
+        sections.forEach((section) => {
+          const top = section.getBoundingClientRect().top;
+          if (top < 120) current = section.id;
+        });
+        navItems.forEach((item) => {
+          item.classList.remove("active");
+          const href = item.getAttribute("href");
+          if (href && href.substring(1) === current)
+            item.classList.add("active");
+        });
+      }
+
+      window.addEventListener("scroll", updateActiveNav, { passive: true });
+      updateActiveNav();
+    </script>
+  </body>
+</html>
