@@ -1,0 +1,2283 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mutual Induction Lab — Pro Simulator</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #07090d;
+        --surface: #0d1117;
+        --surface2: #111820;
+        --border: #1c2733;
+        --border2: #243040;
+        --accent: #5a8fb3;
+        --accent-dim: #2a4b64;
+        --accent-bright: #7fb2d6;
+        --gold: #d2b15c;
+        --gold-dim: #6f5a22;
+        --gold-bright: #e3c77a;
+        --green: #4a9a7a;
+        --green-dim: #2c5a48;
+        --green-bright: #76c7a5;
+        --red: #c46757;
+        --copper: #c8763a;
+        --copper2: #e09050;
+        --text: #c8d8e8;
+        --text-dim: #4a6070;
+        --text-muted: #2a3a4a;
+        --radius: 8px;
+        --radius-lg: 14px;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        overflow: hidden;
+      }
+
+      /* ═══════════════ LAYOUT ═══════════════ */
+      .app {
+        display: grid;
+        grid-template-rows: 56px 1fr;
+        grid-template-columns: 280px 1fr 280px;
+        height: 100vh;
+        grid-template-areas:
+          "hd hd hd"
+          "lp cv rp";
+      }
+
+      /* ═══════════════ HEADER ═══════════════ */
+      header {
+        grid-area: hd;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 24px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        position: relative;
+        z-index: 10;
+      }
+
+      header::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          var(--accent) 30%,
+          var(--gold) 70%,
+          transparent 100%
+        );
+        opacity: 0.4;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .logo-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, var(--accent-dim), var(--accent));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+      }
+
+      .logo-text {
+        font-family: "Syne", sans-serif;
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        color: #fff;
+      }
+
+      .logo-sub {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        color: var(--text-dim);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-top: 1px;
+      }
+
+      .header-badges {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 1px;
+        border: 1px solid var(--border2);
+        color: var(--text-dim);
+        background: var(--surface2);
+      }
+
+      .badge-btn {
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .badge-btn:hover {
+        border-color: var(--gold);
+        color: var(--gold-bright);
+        box-shadow: 0 0 10px rgba(210, 177, 92, 0.25);
+      }
+
+      .badge.live {
+        border-color: var(--green);
+        color: var(--green);
+        background: rgba(34, 212, 122, 0.08);
+        animation: pulse-badge 2s ease-in-out infinite;
+      }
+
+      .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--border2);
+        background: var(--surface2);
+        color: var(--text-dim);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 1px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+      }
+
+      .back-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent-bright);
+        box-shadow: 0 0 10px rgba(90, 143, 179, 0.2);
+      }
+
+      .modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(
+          circle at 20% 20%,
+          rgba(255, 214, 102, 0.2),
+          rgba(7, 9, 13, 0.85) 55%
+        );
+        z-index: 20;
+        padding: 24px;
+      }
+
+      .modal.open {
+        display: flex;
+      }
+
+      .modal-card {
+        width: min(820px, 92vw);
+        background: linear-gradient(135deg, #0c1524 0%, #111b2b 70%);
+        border: 1px solid #ffd666;
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        box-shadow:
+          0 20px 40px rgba(0, 0, 0, 0.45),
+          0 0 18px rgba(255, 214, 102, 0.25);
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        gap: 18px;
+      }
+
+      .modal-title {
+        font-family: "Syne", sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+        color: #fff2b3;
+        margin-bottom: 6px;
+      }
+
+      .modal-sub {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 1.5px;
+        color: #ffd666;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
+
+      .modal-text {
+        color: #e9f2ff;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .modal-image {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid #ffd666;
+        height: 220px;
+        object-fit: cover;
+      }
+
+      .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 14px;
+      }
+
+      .modal-close {
+        padding: 6px 12px;
+        border-radius: 999px;
+        border: 1px solid #ffd666;
+        background: #1a2a3f;
+        color: #ffd666;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .modal-close:hover {
+        border-color: #ffb703;
+        color: #101820;
+        background: #ffb703;
+      }
+
+      @media (max-width: 720px) {
+        .modal-card {
+          grid-template-columns: 1fr;
+        }
+        .modal-image {
+          height: 200px;
+        }
+      }
+
+      @keyframes pulse-badge {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.6;
+        }
+      }
+
+      /* ═══════════════ PANELS ═══════════════ */
+      .left-panel {
+        grid-area: lp;
+      }
+      .right-panel {
+        grid-area: rp;
+      }
+
+      .left-panel,
+      .right-panel {
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        overflow-y: auto;
+        overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .right-panel {
+        border-right: none;
+        border-left: 1px solid var(--border);
+      }
+
+      ::-webkit-scrollbar {
+        width: 3px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border2);
+        border-radius: 2px;
+      }
+
+      .panel-section {
+        padding: 16px 18px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .section-label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .section-label::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+
+      /* ═══════════════ POWER SWITCH ═══════════════ */
+      .power-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 6px;
+      }
+
+      .power-label {
+        font-family: "Syne", sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .power-state {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        color: var(--text-dim);
+        letter-spacing: 1px;
+      }
+
+      .power-state.on {
+        color: var(--green);
+      }
+
+      .toggle-switch {
+        width: 100%;
+        height: 40px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border2);
+        background: var(--surface2);
+        cursor: pointer;
+        font-family: "Syne", sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: var(--text-dim);
+        transition: all 0.25s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 8px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .toggle-switch::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          transparent,
+          rgba(255, 255, 255, 0.03)
+        );
+      }
+
+      .toggle-switch:hover {
+        border-color: var(--border);
+      }
+
+      .toggle-switch.on {
+        background: rgba(34, 212, 122, 0.1);
+        border-color: var(--green);
+        color: var(--green);
+        box-shadow:
+          0 0 20px rgba(34, 212, 122, 0.15),
+          inset 0 0 20px rgba(34, 212, 122, 0.05);
+      }
+
+      .switch-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--text-dim);
+        transition: all 0.25s;
+      }
+
+      .toggle-switch.on .switch-dot {
+        background: var(--green);
+        box-shadow: 0 0 8px var(--green);
+      }
+
+      /* ═══════════════ SLIDERS ═══════════════ */
+      .ctrl {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        margin-bottom: 14px;
+      }
+
+      .ctrl:last-child {
+        margin-bottom: 0;
+      }
+
+      .ctrl-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+
+      .ctrl-name {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--text);
+      }
+
+      .ctrl-val {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        color: var(--accent);
+        font-weight: 600;
+      }
+
+      .ctrl-val.gold {
+        color: var(--gold);
+      }
+      .ctrl-val.green {
+        color: var(--green);
+      }
+      .ctrl-val.red {
+        color: var(--red);
+      }
+
+      .ctrl-desc {
+        font-size: 10px;
+        color: var(--text-dim);
+        margin-top: -4px;
+      }
+
+      input[type="range"] {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 3px;
+        border-radius: 2px;
+        background: var(--border2);
+        outline: none;
+        cursor: pointer;
+      }
+
+      input[type="range"].accent::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 3px rgba(59, 158, 255, 0.2);
+        cursor: pointer;
+        transition: box-shadow 0.15s;
+      }
+      input[type="range"].accent::-webkit-slider-thumb:hover {
+        box-shadow: 0 0 0 5px rgba(59, 158, 255, 0.3);
+      }
+
+      input[type="range"].gold::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--gold);
+        box-shadow: 0 0 0 3px rgba(245, 200, 66, 0.2);
+        cursor: pointer;
+      }
+
+      input[type="range"].green::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 0 0 3px rgba(34, 212, 122, 0.2);
+        cursor: pointer;
+      }
+
+      input[type="range"].red::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--red);
+        box-shadow: 0 0 0 3px rgba(255, 79, 79, 0.2);
+        cursor: pointer;
+      }
+
+      /* ═══════════════ TOGGLE BUTTONS ═══════════════ */
+      .opt-btn {
+        width: 100%;
+        padding: 9px 12px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border2);
+        background: transparent;
+        color: var(--text-dim);
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+        margin-bottom: 6px;
+      }
+
+      .opt-btn:hover {
+        border-color: var(--border);
+        color: var(--text);
+      }
+
+      .opt-btn.active-blue {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: rgba(59, 158, 255, 0.07);
+      }
+      .opt-btn.active-gold {
+        border-color: var(--gold);
+        color: var(--gold);
+        background: rgba(245, 200, 66, 0.07);
+      }
+      .opt-btn.active-red {
+        border-color: var(--red);
+        color: var(--red);
+        background: rgba(255, 79, 79, 0.07);
+      }
+      .opt-btn.active-green {
+        border-color: var(--green);
+        color: var(--green);
+        background: rgba(34, 212, 122, 0.07);
+      }
+
+      .opt-icon {
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+
+      /* ═══════════════ METRIC CARDS ═══════════════ */
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .metric {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 12px 10px;
+        transition: border-color 0.3s;
+      }
+
+      .metric.highlight {
+        border-color: var(--accent-dim);
+      }
+
+      .metric-label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 8px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        margin-bottom: 6px;
+      }
+
+      .metric-val {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text);
+        line-height: 1;
+      }
+
+      .metric-unit {
+        font-size: 10px;
+        color: var(--text-dim);
+        font-weight: 400;
+        margin-left: 2px;
+      }
+
+      .metric-val.accent {
+        color: var(--accent);
+        text-shadow: 0 0 12px rgba(59, 158, 255, 0.4);
+      }
+      .metric-val.gold {
+        color: var(--gold);
+        text-shadow: 0 0 12px rgba(245, 200, 66, 0.4);
+      }
+      .metric-val.green {
+        color: var(--green);
+        text-shadow: 0 0 12px rgba(34, 212, 122, 0.4);
+      }
+      .metric-val.red {
+        color: var(--red);
+        text-shadow: 0 0 12px rgba(255, 79, 79, 0.4);
+      }
+
+      .metric-bar {
+        height: 2px;
+        background: var(--border);
+        border-radius: 1px;
+        margin-top: 8px;
+        overflow: hidden;
+      }
+
+      .metric-bar-fill {
+        height: 100%;
+        border-radius: 1px;
+        transition: width 0.4s ease;
+      }
+
+      .metric-bar-fill.accent {
+        background: var(--accent);
+      }
+      .metric-bar-fill.gold {
+        background: var(--gold);
+      }
+      .metric-bar-fill.green {
+        background: var(--green);
+      }
+      .metric-bar-fill.red {
+        background: var(--red);
+      }
+
+      /* ═══════════════ LED PANEL ═══════════════ */
+      .led-panel {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .led-title {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 3px;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        align-self: flex-start;
+      }
+
+      .led-visual {
+        position: relative;
+        width: 60px;
+        height: 80px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .led-glow-ring {
+        position: absolute;
+        top: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(255, 80, 0, 0.3) 0%,
+          transparent 70%
+        );
+        opacity: 0;
+        transition: opacity 0.4s;
+        pointer-events: none;
+      }
+
+      .led-glow-ring.on {
+        opacity: 1;
+      }
+
+      .led-dome {
+        width: 40px;
+        height: 40px;
+        border-radius: 50% 50% 40% 40%;
+        background: radial-gradient(circle at 35% 30%, #5a1a1a, #220000);
+        position: relative;
+        z-index: 1;
+        transition: all 0.3s;
+        flex-shrink: 0;
+      }
+
+      .led-dome.on {
+        background: radial-gradient(circle at 35% 30%, #ffffff, #ff7700);
+        box-shadow:
+          0 0 8px #ff5500,
+          0 0 25px rgba(255, 80, 0, 0.6),
+          0 0 50px rgba(255, 80, 0, 0.3);
+      }
+
+      .led-neck {
+        width: 20px;
+        height: 8px;
+        background: #2a3a2a;
+        border-radius: 0 0 4px 4px;
+      }
+
+      .led-legs-wrap {
+        display: flex;
+        gap: 10px;
+      }
+
+      .led-pin {
+        width: 2px;
+        height: 22px;
+        background: #4a5a4a;
+        border-radius: 1px;
+      }
+
+      .led-status-row {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .led-status-txt {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 1px;
+        color: var(--text-dim);
+      }
+
+      .led-status-txt.on {
+        color: #ff8844;
+      }
+
+      .led-pct {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-dim);
+        transition: color 0.3s;
+      }
+
+      .led-pct.on {
+        color: #ff8844;
+        text-shadow: 0 0 10px rgba(255, 136, 68, 0.5);
+      }
+
+      .led-intensity-track {
+        width: 100%;
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+
+      .led-intensity-fill {
+        height: 100%;
+        border-radius: 2px;
+        background: linear-gradient(90deg, #ff3300, #ff9900);
+        box-shadow: 0 0 6px rgba(255, 100, 0, 0.5);
+        transition: width 0.4s ease;
+      }
+
+      /* ═══════════════ LOG ═══════════════ */
+      .log-box {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 10px 12px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        line-height: 1.7;
+        height: 130px;
+        overflow-y: auto;
+        color: var(--text-muted);
+      }
+
+      .log-line {
+        animation: fadeInUp 0.2s ease forwards;
+        opacity: 0;
+      }
+      @keyframes fadeInUp {
+        to {
+          opacity: 1;
+        }
+      }
+      .log-line.g {
+        color: var(--green);
+      }
+      .log-line.b {
+        color: var(--accent);
+      }
+      .log-line.y {
+        color: var(--gold);
+      }
+      .log-line.r {
+        color: var(--red);
+      }
+
+      /* ═══════════════ CANVAS ═══════════════ */
+      .canvas-wrap {
+        grid-area: cv;
+        position: relative;
+        overflow: hidden;
+        background:
+          radial-gradient(
+            circle at 25% 20%,
+            rgba(90, 143, 179, 0.06),
+            transparent 45%
+          ),
+          radial-gradient(
+            circle at 80% 70%,
+            rgba(210, 177, 92, 0.05),
+            transparent 50%
+          ),
+          var(--bg);
+        perspective: 900px;
+      }
+
+      .canvas-wrap::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(90, 143, 179, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(90, 143, 179, 0.03) 1px, transparent 1px);
+        background-size: 32px 32px;
+        pointer-events: none;
+      }
+
+      .canvas-wrap::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(
+            circle at 70% 20%,
+            rgba(90, 143, 179, 0.09),
+            transparent 45%
+          ),
+          radial-gradient(
+            circle at 20% 80%,
+            rgba(210, 177, 92, 0.08),
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 50% 50%,
+            rgba(74, 154, 122, 0.06),
+            transparent 55%
+          );
+        pointer-events: none;
+        mix-blend-mode: screen;
+        opacity: 0.5;
+        animation: glowShift 12s ease-in-out infinite;
+      }
+
+      @keyframes glowShift {
+        0%,
+        100% {
+          transform: translate3d(0, 0, 0);
+          opacity: 0.8;
+        }
+        50% {
+          transform: translate3d(0, -8px, 0);
+          opacity: 1;
+        }
+      }
+
+      .canvas-stage {
+        position: absolute;
+        inset: 0;
+        transform-style: preserve-3d;
+        transform-origin: center center;
+        filter: drop-shadow(0 18px 36px rgba(0, 0, 0, 0.25));
+        transition: transform 0.08s ease-out;
+      }
+
+      .canvas-wrap.dragging .canvas-stage {
+        transition: none;
+        cursor: grabbing;
+      }
+
+      .zoom-controls {
+        position: absolute;
+        right: 14px;
+        bottom: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        z-index: 5;
+      }
+
+      .zoom-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        border: 1px solid var(--border2);
+        background: rgba(17, 24, 32, 0.9);
+        color: var(--text);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 14px;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s,
+          transform 0.2s;
+      }
+
+      .zoom-btn:hover {
+        border-color: var(--accent);
+        box-shadow: 0 0 10px rgba(90, 143, 179, 0.22);
+        transform: translateY(-1px);
+      }
+
+      .zoom-hint {
+        position: absolute;
+        left: 14px;
+        bottom: 16px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 1px;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        z-index: 5;
+        opacity: 0.8;
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      /* corner decorations */
+      .corner {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        pointer-events: none;
+        opacity: 0.4;
+      }
+      .corner.tl {
+        top: 12px;
+        left: 12px;
+        border-top: 1px solid var(--accent);
+        border-left: 1px solid var(--accent);
+      }
+      .corner.tr {
+        top: 12px;
+        right: 12px;
+        border-top: 1px solid var(--accent);
+        border-right: 1px solid var(--accent);
+      }
+      .corner.bl {
+        bottom: 32px;
+        left: 12px;
+        border-bottom: 1px solid var(--accent);
+        border-left: 1px solid var(--accent);
+      }
+      .corner.br {
+        bottom: 32px;
+        right: 12px;
+        border-bottom: 1px solid var(--accent);
+        border-right: 1px solid var(--accent);
+      }
+
+      .canvas-footer {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 24px;
+        align-items: center;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        color: var(--text-muted);
+        letter-spacing: 1px;
+        white-space: nowrap;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(7, 9, 13, 0.7);
+        border: 1px solid rgba(36, 48, 64, 0.7);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+      }
+
+      .canvas-footer span {
+        color: var(--accent-bright);
+        text-shadow: 0 0 6px rgba(127, 178, 214, 0.25);
+      }
+
+      @media (max-width: 1100px) {
+        .canvas-footer {
+          gap: 12px;
+          font-size: 9px;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .canvas-footer {
+          white-space: normal;
+          flex-wrap: wrap;
+          justify-content: center;
+          max-width: 90%;
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <!-- ═══ HEADER ═══ -->
+      <header>
+        <div class="logo">
+          <div class="logo-icon">⚡</div>
+          <div>
+            <div class="logo-text">MUTUAL INDUCTION LAB</div>
+            <div class="logo-sub">Electromagnetic Induction Simulator</div>
+          </div>
+        </div>
+        <div class="header-badges">
+          <a class="back-btn" href="title.html" aria-label="Back to landing">
+            ← Back
+          </a>
+          <button class="badge badge-btn" id="faradayBtn" type="button">
+            FARADAY'S LAW
+          </button>
+          <div class="badge">v2.0</div>
+          <div class="badge live" id="liveBadge">● IDLE</div>
+        </div>
+      </header>
+
+      <!-- ═══ LEFT PANEL ═══ -->
+      <div class="left-panel">
+        <!-- Power -->
+        <div class="panel-section">
+          <div class="section-label">Power Control</div>
+          <div class="power-row">
+            <div class="power-label">Circuit Switch</div>
+            <div class="power-state" id="pwrState">OPEN</div>
+          </div>
+          <button
+            class="toggle-switch"
+            id="mainSwitch"
+            onclick="toggleSwitch()"
+          >
+            <div class="switch-dot" id="switchDot"></div>
+            <span id="switchTxt">SWITCH OFF</span>
+          </button>
+        </div>
+
+        <!-- Primary Coil -->
+        <div class="panel-section">
+          <div class="section-label">Primary Coil</div>
+
+          <div class="ctrl">
+            <div class="ctrl-header">
+              <div class="ctrl-name">Number of Turns (N₁)</div>
+              <div class="ctrl-val accent" id="n1v">20</div>
+            </div>
+            <div class="ctrl-desc">More turns → stronger magnetic field</div>
+            <input
+              type="range"
+              class="accent"
+              id="n1"
+              min="5"
+              max="100"
+              value="20"
+              oninput="updateSim()"
+            />
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-header">
+              <div class="ctrl-name">Core Material</div>
+              <div class="ctrl-val gold" id="muv">Air (μᵣ=1)</div>
+            </div>
+            <div class="ctrl-desc">Permeability of core affects flux</div>
+            <input
+              type="range"
+              class="gold"
+              id="mu"
+              min="1"
+              max="5"
+              value="1"
+              step="1"
+              oninput="updateSim()"
+            />
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-header">
+              <div class="ctrl-name">Source Current (A)</div>
+              <div class="ctrl-val accent" id="currv">2.0 A</div>
+            </div>
+            <div class="ctrl-desc">Controlled via rheostat</div>
+            <input
+              type="range"
+              class="accent"
+              id="curr"
+              min="1"
+              max="20"
+              value="4"
+              oninput="updateSim()"
+            />
+          </div>
+        </div>
+
+        <!-- Geometry -->
+        <div class="panel-section">
+          <div class="section-label">Geometry</div>
+
+          <div class="ctrl">
+            <div class="ctrl-header">
+              <div class="ctrl-name">Coil Separation (cm)</div>
+              <div class="ctrl-val red" id="distv">5 cm</div>
+            </div>
+            <div class="ctrl-desc">↑ Distance → ↓ coupling</div>
+            <input
+              type="range"
+              class="red"
+              id="dist"
+              min="1"
+              max="20"
+              value="5"
+              oninput="updateSim()"
+            />
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-header">
+              <div class="ctrl-name">Coil Alignment (°)</div>
+              <div class="ctrl-val gold" id="anglev">0°</div>
+            </div>
+            <div class="ctrl-desc">Misalignment reduces flux linkage</div>
+            <input
+              type="range"
+              class="gold"
+              id="angle"
+              min="0"
+              max="90"
+              value="0"
+              oninput="updateSim()"
+            />
+          </div>
+        </div>
+
+        <!-- Modes -->
+        <div class="panel-section">
+          <div class="section-label">Source Mode</div>
+          <button class="opt-btn" id="acBtn" onclick="toggleAC()">
+            <span class="opt-icon">≈</span> AC / Continuous Mode
+          </button>
+          <button class="opt-btn" id="revBtn" onclick="toggleReverse()">
+            <span class="opt-icon">⇄</span> Reverse Polarity
+          </button>
+          <button class="opt-btn" id="shieldBtn" onclick="toggleShield()">
+            <span class="opt-icon">🛡</span> Magnetic Shielding
+          </button>
+        </div>
+      </div>
+
+      <!-- ═══ CANVAS ═══ -->
+      <div class="canvas-wrap" id="canvasWrap">
+        <div class="canvas-stage" id="canvasStage">
+          <div class="corner tl"></div>
+          <div class="corner tr"></div>
+          <div class="corner bl"></div>
+          <div class="corner br"></div>
+          <canvas id="c"></canvas>
+          <div class="canvas-footer" id="footer">
+            EMF: <span id="fEmf">0.00 V</span> &nbsp;|&nbsp; Flux:
+            <span id="fFlux">0.00 mWb</span> &nbsp;|&nbsp; η:
+            <span id="fEff">0%</span> &nbsp;|&nbsp; Status:
+            <span id="fStatus">IDLE</span>
+          </div>
+        </div>
+        <div class="zoom-controls">
+          <button class="zoom-btn" data-zoom="in" aria-label="Zoom in">
+            +
+          </button>
+          <button class="zoom-btn" data-zoom="out" aria-label="Zoom out">
+            -
+          </button>
+          <button class="zoom-btn" data-zoom="reset" aria-label="Reset view">
+            ⟲
+          </button>
+        </div>
+        <div class="zoom-hint">Scroll to zoom · Drag to pan</div>
+      </div>
+
+      <!-- ═══ RIGHT PANEL ═══ -->
+      <div class="right-panel">
+        <!-- Secondary coil -->
+        <div class="panel-section">
+          <div class="section-label">Secondary Coil</div>
+
+          <div class="ctrl">
+            <div class="ctrl-header">
+              <div class="ctrl-name">Number of Turns (N₂)</div>
+              <div class="ctrl-val green" id="n2v">20</div>
+            </div>
+            <div class="ctrl-desc">More turns → higher induced EMF</div>
+            <input
+              type="range"
+              class="green"
+              id="n2"
+              min="5"
+              max="100"
+              value="20"
+              oninput="updateSim()"
+            />
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-header">
+              <div class="ctrl-name">Load Resistance (Ω)</div>
+              <div class="ctrl-val green" id="loadv">10 Ω</div>
+            </div>
+            <div class="ctrl-desc">Affects secondary current & power</div>
+            <input
+              type="range"
+              class="green"
+              id="load"
+              min="1"
+              max="100"
+              value="10"
+              oninput="updateSim()"
+            />
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-header">
+              <div class="ctrl-name">Wire Resistance (Ω)</div>
+              <div class="ctrl-val red" id="wirev">0.5 Ω</div>
+            </div>
+            <div class="ctrl-desc">Coil wire resistance (losses)</div>
+            <input
+              type="range"
+              class="red"
+              id="wire"
+              min="1"
+              max="20"
+              value="1"
+              oninput="updateSim()"
+            />
+          </div>
+        </div>
+
+        <!-- Metrics -->
+        <div class="panel-section">
+          <div class="section-label">Live Readings</div>
+          <div class="metrics-grid">
+            <div class="metric">
+              <div class="metric-label">EMF Induced</div>
+              <div class="metric-val accent" id="mEmf">
+                0.00<span class="metric-unit">V</span>
+              </div>
+              <div class="metric-bar">
+                <div
+                  class="metric-bar-fill accent"
+                  id="bEmf"
+                  style="width: 0%"
+                ></div>
+              </div>
+            </div>
+
+            <div class="metric">
+              <div class="metric-label">Mutual Inductance</div>
+              <div class="metric-val gold" id="mM">
+                0.00<span class="metric-unit">mH</span>
+              </div>
+              <div class="metric-bar">
+                <div
+                  class="metric-bar-fill gold"
+                  id="bM"
+                  style="width: 0%"
+                ></div>
+              </div>
+            </div>
+
+            <div class="metric">
+              <div class="metric-label">Magnetic Flux</div>
+              <div class="metric-val accent" id="mFlux">
+                0.00<span class="metric-unit">mWb</span>
+              </div>
+              <div class="metric-bar">
+                <div
+                  class="metric-bar-fill accent"
+                  id="bFlux"
+                  style="width: 0%"
+                ></div>
+              </div>
+            </div>
+
+            <div class="metric">
+              <div class="metric-label">Coupling Factor k</div>
+              <div class="metric-val green" id="mK">0.00</div>
+              <div class="metric-bar">
+                <div
+                  class="metric-bar-fill green"
+                  id="bK"
+                  style="width: 0%"
+                ></div>
+              </div>
+            </div>
+
+            <div class="metric">
+              <div class="metric-label">Secondary Current</div>
+              <div class="metric-val green" id="mI2">
+                0.00<span class="metric-unit">A</span>
+              </div>
+              <div class="metric-bar">
+                <div
+                  class="metric-bar-fill green"
+                  id="bI2"
+                  style="width: 0%"
+                ></div>
+              </div>
+            </div>
+
+            <div class="metric">
+              <div class="metric-label">Power Transfer</div>
+              <div class="metric-val gold" id="mP">
+                0.00<span class="metric-unit">W</span>
+              </div>
+              <div class="metric-bar">
+                <div
+                  class="metric-bar-fill gold"
+                  id="bP"
+                  style="width: 0%"
+                ></div>
+              </div>
+            </div>
+
+            <div class="metric">
+              <div class="metric-label">Turns Ratio</div>
+              <div class="metric-val accent" id="mRatio">1.00</div>
+              <div class="metric-bar">
+                <div
+                  class="metric-bar-fill accent"
+                  id="bRatio"
+                  style="width: 50%"
+                ></div>
+              </div>
+            </div>
+
+            <div class="metric">
+              <div class="metric-label">Efficiency η</div>
+              <div class="metric-val green" id="mEff">0%</div>
+              <div class="metric-bar">
+                <div
+                  class="metric-bar-fill green"
+                  id="bEff"
+                  style="width: 0%"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LED -->
+        <div class="panel-section">
+          <div class="led-panel">
+            <div class="led-title">LED Output Indicator</div>
+            <div class="led-visual">
+              <div class="led-glow-ring" id="ledGlow"></div>
+              <div class="led-dome" id="ledDome"></div>
+              <div class="led-neck"></div>
+              <div class="led-legs-wrap">
+                <div class="led-pin"></div>
+                <div class="led-pin"></div>
+              </div>
+            </div>
+            <div class="led-status-row">
+              <div class="led-status-txt" id="ledTxt">○ NO OUTPUT</div>
+              <div class="led-pct" id="ledPct">0%</div>
+            </div>
+            <div class="led-intensity-track">
+              <div
+                class="led-intensity-fill"
+                id="ledFill"
+                style="width: 0%"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Log -->
+        <div class="panel-section" style="flex: 1">
+          <div class="section-label">Event Log</div>
+          <div class="log-box" id="logBox">
+            <div style="color: var(--text-muted)">
+              // System ready. Awaiting input...
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- end right -->
+    </div>
+    <!-- end app -->
+
+    <div class="modal" id="faradayModal" aria-hidden="true">
+      <div
+        class="modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="faradayTitle"
+      >
+        <img
+          class="modal-image"
+          src="Michael_Faraday_sitting_crop.png"
+          alt="Portrait of Michael Faraday"
+        />
+        <div>
+          <div class="modal-title" id="faradayTitle">
+            Faraday's Law of Induction
+          </div>
+          <div class="modal-sub">1831 - Foundations of Electromagnetism</div>
+          <p class="modal-text">
+            Faraday's law states that a changing magnetic flux through a circuit
+            induces an electromotive force (EMF). In simple terms, moving a
+            magnet near a coil, or changing the current in a nearby coil,
+            creates a voltage in the circuit. The induced EMF is proportional to
+            how quickly the flux changes, which is the core principle behind
+            generators and transformers.
+          </p>
+          <p
+            class="modal-text"
+            style="margin-top: 10px; color: var(--text-dim)"
+          >
+            Michael Faraday was a British scientist who pioneered experimental
+            electromagnetism and electrochemistry. His 1831 experiments
+            demonstrated electromagnetic induction, laying the groundwork for
+            modern electric power.
+          </p>
+          <div class="modal-actions">
+            <button class="modal-close" id="faradayClose" type="button">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ══════════════════════════════════════════
+      //  STATE
+      // ══════════════════════════════════════════
+      const S = {
+        on: false,
+        ac: false,
+        rev: false,
+        shield: false,
+        n1: 20,
+        n2: 20,
+        curr: 2,
+        dist: 5,
+        angle: 0,
+        mu: 1,
+        load: 10,
+        wire: 0.5,
+        // computed
+        emf: 0,
+        M: 0,
+        flux: 0,
+        k: 0,
+        i2: 0,
+        pwr: 0,
+        eff: 0,
+        led: 0,
+        t: 0,
+      };
+
+      const MU_LABELS = [
+        "Air (μᵣ=1)",
+        "Wood (μᵣ=2)",
+        "Ferrite (μᵣ=10)",
+        "Iron (μᵣ=100)",
+        "Silicon Steel (μᵣ=400)",
+      ];
+      const MU_VALS = [1, 2, 10, 100, 400];
+
+      // ══════════════════════════════════════════
+      //  CANVAS
+      // ══════════════════════════════════════════
+      const canvas = document.getElementById("c");
+      const ctx = canvas.getContext("2d");
+      const canvasWrap = document.getElementById("canvasWrap");
+      const canvasStage = document.getElementById("canvasStage");
+
+      function resize() {
+        const r = canvas.parentElement.getBoundingClientRect();
+        canvas.width = r.width;
+        canvas.height = r.height;
+      }
+      resize();
+      window.addEventListener("resize", resize);
+
+      // ══════════════════════════════════════════
+      //  VIEW (3D / ZOOM)
+      // ══════════════════════════════════════════
+      const view = {
+        scale: 1,
+        x: 0,
+        y: 0,
+        min: 0.6,
+        max: 2.2,
+        dragging: false,
+        lastX: 0,
+        lastY: 0,
+      };
+
+      function clamp(n, min, max) {
+        return Math.max(min, Math.min(max, n));
+      }
+
+      function applyView() {
+        canvasStage.style.transform =
+          `translate3d(${view.x}px, ${view.y}px, 0)` +
+          ` scale(${view.scale}) rotateX(6deg) rotateY(-4deg)`;
+      }
+
+      function zoomTo(nextScale) {
+        view.scale = clamp(nextScale, view.min, view.max);
+        applyView();
+      }
+
+      canvasWrap.addEventListener(
+        "wheel",
+        (e) => {
+          e.preventDefault();
+          const delta = Math.sign(e.deltaY || 0);
+          const factor = delta > 0 ? 0.93 : 1.07;
+          zoomTo(view.scale * factor);
+        },
+        { passive: false },
+      );
+
+      canvasWrap.addEventListener("pointerdown", (e) => {
+        if (e.button !== 0) return;
+        if (e.target.closest(".zoom-controls")) return;
+        view.dragging = true;
+        view.lastX = e.clientX;
+        view.lastY = e.clientY;
+        canvasWrap.setPointerCapture(e.pointerId);
+        canvasWrap.classList.add("dragging");
+      });
+
+      canvasWrap.addEventListener("pointermove", (e) => {
+        if (!view.dragging) return;
+        const dx = e.clientX - view.lastX;
+        const dy = e.clientY - view.lastY;
+        view.lastX = e.clientX;
+        view.lastY = e.clientY;
+        view.x += dx;
+        view.y += dy;
+        applyView();
+      });
+
+      function stopDrag(e) {
+        if (!view.dragging) return;
+        view.dragging = false;
+        canvasWrap.classList.remove("dragging");
+        canvasWrap.releasePointerCapture(e.pointerId);
+      }
+
+      canvasWrap.addEventListener("pointerup", stopDrag);
+      canvasWrap.addEventListener("pointercancel", stopDrag);
+
+      document.querySelectorAll(".zoom-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const action = btn.dataset.zoom;
+          if (action === "in") zoomTo(view.scale * 1.1);
+          if (action === "out") zoomTo(view.scale * 0.9);
+          if (action === "reset") {
+            view.scale = 1;
+            view.x = 0;
+            view.y = 0;
+            applyView();
+          }
+        });
+      });
+
+      applyView();
+
+      // ══════════════════════════════════════════
+      //  CONTROLS
+      // ══════════════════════════════════════════
+      function toggleSwitch() {
+        S.on = !S.on;
+        document.getElementById("mainSwitch").classList.toggle("on", S.on);
+        document.getElementById("switchDot").style.background = S.on
+          ? "var(--green)"
+          : "";
+        document.getElementById("switchDot").style.boxShadow = S.on
+          ? "0 0 8px var(--green)"
+          : "";
+        document.getElementById("switchTxt").textContent = S.on
+          ? "SWITCH ON"
+          : "SWITCH OFF";
+        document.getElementById("pwrState").textContent = S.on
+          ? "CLOSED"
+          : "OPEN";
+        document.getElementById("pwrState").className = S.on
+          ? "power-state on"
+          : "power-state";
+        log(
+          S.on
+            ? "Switch closed — current flowing through primary coil."
+            : "Switch opened — circuit broken.",
+          S.on ? "g" : "y",
+        );
+        updateSim();
+      }
+
+      function startSimulation() {
+        if (!S.on) {
+          toggleSwitch();
+        }
+      }
+
+      function toggleAC() {
+        S.ac = !S.ac;
+        const b = document.getElementById("acBtn");
+        b.className = S.ac ? "opt-btn active-blue" : "opt-btn";
+        log(
+          S.ac ? "AC mode ON — continuous alternating flux." : "AC mode OFF.",
+          "b",
+        );
+        updateSim();
+      }
+
+      function toggleReverse() {
+        S.rev = !S.rev;
+        const b = document.getElementById("revBtn");
+        b.className = S.rev ? "opt-btn active-gold" : "opt-btn";
+        log(
+          S.rev
+            ? "Polarity reversed — field direction inverted."
+            : "Polarity restored.",
+          "y",
+        );
+        updateSim();
+      }
+
+      function toggleShield() {
+        S.shield = !S.shield;
+        const b = document.getElementById("shieldBtn");
+        b.className = S.shield ? "opt-btn active-red" : "opt-btn";
+        log(
+          S.shield
+            ? "Magnetic shield enabled — reduces coupling by 70%."
+            : "Shielding removed.",
+          "r",
+        );
+        updateSim();
+      }
+
+      function updateSim() {
+        S.n1 = +document.getElementById("n1").value;
+        S.n2 = +document.getElementById("n2").value;
+        S.curr = +document.getElementById("curr").value / 2;
+        S.dist = +document.getElementById("dist").value;
+        S.angle = +document.getElementById("angle").value;
+        S.mu = MU_VALS[+document.getElementById("mu").value - 1];
+        S.load = +document.getElementById("load").value;
+        S.wire = +document.getElementById("wire").value / 10;
+
+        // Labels
+        document.getElementById("n1v").textContent = S.n1;
+        document.getElementById("n2v").textContent = S.n2;
+        document.getElementById("currv").textContent = S.curr.toFixed(1) + " A";
+        document.getElementById("distv").textContent = S.dist + " cm";
+        document.getElementById("anglev").textContent = S.angle + "°";
+        document.getElementById("muv").textContent =
+          MU_LABELS[MU_VALS.indexOf(S.mu)];
+        document.getElementById("loadv").textContent = S.load + " Ω";
+        document.getElementById("wirev").textContent = S.wire.toFixed(1) + " Ω";
+
+        const active = S.on || S.ac;
+
+        if (active) {
+          // Physics
+          const distFactor = Math.max(0, 1 - (S.dist - 1) / 19);
+          const angleFactor = Math.cos((S.angle * Math.PI) / 180);
+          const shieldFactor = S.shield ? 0.3 : 1.0;
+          const muNorm = Math.log10(S.mu + 1) / Math.log10(401); // normalize 0-1
+
+          S.k = distFactor * angleFactor * shieldFactor * (0.5 + 0.5 * muNorm);
+          S.k = Math.min(0.99, S.k);
+          S.M = S.k * Math.sqrt(S.n1 * S.n2) * S.mu * 0.05; // mH approx
+          S.flux =
+            S.curr *
+            S.n1 *
+            S.mu *
+            distFactor *
+            angleFactor *
+            shieldFactor *
+            0.04;
+          S.emf = S.M * S.curr * S.n2 * 0.06 * (1 + muNorm);
+          S.i2 = S.emf / (S.load + S.wire);
+          S.pwr = S.i2 * S.i2 * S.load;
+
+          const inputPwr = S.curr * S.curr * 2.0;
+          S.eff = inputPwr > 0 ? Math.min(99, (S.pwr / inputPwr) * 100) : 0;
+          S.led = Math.min(100, S.emf * 7);
+        } else {
+          S.k = S.M = S.flux = S.emf = S.i2 = S.pwr = S.eff = S.led = 0;
+        }
+
+        // Metrics
+        setMetric("mEmf", S.emf.toFixed(2), "V", "accent", S.emf, 20, "bEmf");
+        setMetric("mM", S.M.toFixed(2), "mH", "gold", S.M, 10, "bM");
+        setMetric(
+          "mFlux",
+          S.flux.toFixed(2),
+          "mWb",
+          "accent",
+          S.flux,
+          5,
+          "bFlux",
+        );
+        setMetric("mK", S.k.toFixed(3), "", "green", S.k, 1, "bK");
+        setMetric("mI2", S.i2.toFixed(2), "A", "green", S.i2, 2, "bI2");
+        setMetric("mP", S.pwr.toFixed(2), "W", "gold", S.pwr, 10, "bP");
+
+        const ratio = S.n2 / S.n1;
+        document.getElementById("mRatio").innerHTML = ratio.toFixed(2);
+        document.getElementById("bRatio").style.width =
+          Math.min(100, ratio * 50) + "%";
+
+        document.getElementById("mEff").innerHTML = S.eff.toFixed(0) + "%";
+        document.getElementById("bEff").style.width = S.eff + "%";
+
+        // LED
+        const ledOn = S.led > 8;
+        document.getElementById("ledDome").className = ledOn
+          ? "led-dome on"
+          : "led-dome";
+        document.getElementById("ledGlow").className = ledOn
+          ? "led-glow-ring on"
+          : "led-glow-ring";
+        document.getElementById("ledFill").style.width = S.led + "%";
+        document.getElementById("ledTxt").textContent = ledOn
+          ? "◉ GLOWING"
+          : "○ NO OUTPUT";
+        document.getElementById("ledTxt").className = ledOn
+          ? "led-status-txt on"
+          : "led-status-txt";
+        document.getElementById("ledPct").textContent = Math.round(S.led) + "%";
+        document.getElementById("ledPct").className = ledOn
+          ? "led-pct on"
+          : "led-pct";
+
+        // Footer
+        document.getElementById("fEmf").textContent = S.emf.toFixed(2) + " V";
+        document.getElementById("fFlux").textContent =
+          S.flux.toFixed(2) + " mWb";
+        document.getElementById("fEff").textContent = S.eff.toFixed(0) + "%";
+        document.getElementById("fStatus").textContent = !active
+          ? "IDLE"
+          : S.k < 0.2
+            ? "WEAK COUPLING"
+            : S.k > 0.7
+              ? "STRONG COUPLING"
+              : "ACTIVE";
+
+        // Live badge
+        const badge = document.getElementById("liveBadge");
+        badge.textContent = active ? "● LIVE" : "● IDLE";
+        badge.className = active ? "badge live" : "badge";
+      }
+
+      function setMetric(id, val, unit, cls, raw, max, barId) {
+        document.getElementById(id).innerHTML =
+          val + `<span class="metric-unit">${unit}</span>`;
+        document.getElementById(id).className = "metric-val " + cls;
+        document.getElementById(barId).style.width =
+          Math.min(100, (raw / max) * 100) + "%";
+      }
+
+      // ══════════════════════════════════════════
+      //  LOG
+      // ══════════════════════════════════════════
+      let logN = 0;
+      function log(msg, cls = "") {
+        const box = document.getElementById("logBox");
+        if (logN === 0) box.innerHTML = "";
+        const d = document.createElement("div");
+        d.className = "log-line " + cls;
+        const ts = new Date().toLocaleTimeString("en-GB");
+        d.textContent = `[${ts}] ${msg}`;
+        box.appendChild(d);
+        box.scrollTop = 9999;
+        logN++;
+        if (logN > 40) box.removeChild(box.firstChild);
+      }
+
+      // ══════════════════════════════════════════
+      //  DRAW
+      // ══════════════════════════════════════════
+      function draw(ts) {
+        S.t = ts * 0.001;
+        const W = canvas.width,
+          H = canvas.height;
+        ctx.clearRect(0, 0, W, H);
+
+        const cxScreen = W / 2;
+        const cyScreen = H / 2 - 20;
+        const baseGap = 80 + S.dist * 12;
+        const maxGap = Math.max(120, (W / 2 - 120) / 1.9);
+        const sceneScale = Math.min(1, maxGap / baseGap);
+
+        ctx.save();
+        ctx.translate(cxScreen, cyScreen);
+        ctx.scale(sceneScale, sceneScale);
+
+        const cx = 0,
+          cy = 0;
+        const gap = baseGap;
+        const lx = cx - gap,
+          rx = cx + gap;
+
+        drawBattery(lx - gap * 0.9, cy);
+        drawWires(lx - gap * 0.9, lx, rx, cy);
+        drawCoil(lx, cy, S.n1, "#b87333", "#e09050", S.on || S.ac, S.angle);
+        drawFieldLines(lx, rx, cy, S.t);
+        drawCoil(rx, cy, S.n2, "#b87333", "#e09050", false, 0);
+        drawLED(rx + gap * 0.9, cy);
+        drawLabels(lx, rx, cy);
+
+        ctx.restore();
+
+        requestAnimationFrame(draw);
+      }
+
+      function drawBattery(x, cy) {
+        const on = S.on || S.ac;
+        // Shadow
+        if (on) {
+          ctx.shadowColor = "rgba(59,158,255,0.3)";
+          ctx.shadowBlur = 14;
+        }
+        // Body
+        const grad = ctx.createLinearGradient(x - 18, 0, x + 18, 0);
+        grad.addColorStop(0, "#1a2a3a");
+        grad.addColorStop(0.5, "#22364a");
+        grad.addColorStop(1, "#1a2a3a");
+        ctx.fillStyle = grad;
+        ctx.strokeStyle = on ? "var(--accent)" : "#243040";
+        ctx.lineWidth = 1;
+        roundRect(ctx, x - 18, cy - 36, 36, 72, 6);
+        ctx.fill();
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Top terminal (+)
+        ctx.fillStyle = on ? "#ff5555" : "#552222";
+        roundRect(ctx, x - 7, cy - 44, 14, 10, 3);
+        ctx.fill();
+
+        // Cells
+        for (let i = 0; i < 4; i++) {
+          ctx.fillStyle =
+            i % 2 === 0 ? "rgba(59,158,255,0.06)" : "rgba(0,0,0,0.2)";
+          roundRect(ctx, x - 14, cy - 30 + i * 15, 28, 12, 2);
+          ctx.fill();
+        }
+        // Lines across cells
+        for (let i = 0; i < 3; i++) {
+          ctx.strokeStyle = "#1c2733";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(x - 14, cy - 16 + i * 15);
+          ctx.lineTo(x + 14, cy - 16 + i * 15);
+          ctx.stroke();
+        }
+
+        // Label
+        ctx.fillStyle = "#3b9eff44";
+        ctx.font = 'bold 8px "JetBrains Mono"';
+        ctx.textAlign = "center";
+        ctx.fillText("9V", x, cy + 48);
+        ctx.fillText("DC", x, cy + 58);
+      }
+
+      function drawWires(bx, lx, rx, cy) {
+        const on = S.on || S.ac;
+        const wireColor = on ? (S.rev ? "#ffd45e" : "#5fb7ff") : "#1c2733";
+        const glowColor = S.rev
+          ? "rgba(255,212,94,0.45)"
+          : "rgba(95,183,255,0.45)";
+
+        ctx.lineWidth = on ? 2 : 1.5;
+        ctx.strokeStyle = wireColor;
+        if (on) {
+          ctx.shadowColor = glowColor;
+          ctx.shadowBlur = 6;
+        }
+
+        // Top wire: battery → left coil
+        ctx.beginPath();
+        ctx.moveTo(bx, cy - 36);
+        ctx.lineTo(bx, cy - 60);
+        ctx.lineTo(lx - 40, cy - 60);
+        ctx.lineTo(lx - 40, cy - 20);
+        ctx.stroke();
+
+        // Bottom wire: battery → left coil
+        ctx.beginPath();
+        ctx.moveTo(bx, cy + 36);
+        ctx.lineTo(bx, cy + 60);
+        ctx.lineTo(lx - 40, cy + 60);
+        ctx.lineTo(lx - 40, cy + 20);
+        ctx.stroke();
+
+        // Switch symbol (middle of bottom wire)
+        const swx = bx + 30,
+          swy = cy + 60;
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = "#243040";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(swx, swy, 6, 0, Math.PI * 2);
+        ctx.stroke();
+        if (on) {
+          ctx.strokeStyle = wireColor;
+          ctx.lineWidth = 2;
+        }
+        ctx.beginPath();
+        ctx.moveTo(swx - 4, swy);
+        ctx.lineTo(swx + 4, on ? swy : swy - 7);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Right side: secondary coil → LED
+        const ledX = rx + (rx - bx) * 0.9;
+        const ledOn = S.led > 8;
+        ctx.strokeStyle = ledOn ? "#22d47a" : "#1c2733";
+        ctx.lineWidth = ledOn ? 2 : 1.5;
+        if (ledOn) {
+          ctx.shadowColor = "rgba(34,212,122,0.3)";
+          ctx.shadowBlur = 8;
+        }
+        ctx.beginPath();
+        ctx.moveTo(rx + 40, cy - 20);
+        ctx.lineTo(rx + 40, cy - 60);
+        ctx.lineTo(ledX, cy - 60);
+        ctx.lineTo(ledX, cy - 20);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(rx + 40, cy + 20);
+        ctx.lineTo(rx + 40, cy + 60);
+        ctx.lineTo(ledX, cy + 60);
+        ctx.lineTo(ledX, cy + 20);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      }
+
+      function drawCoil(cx, cy, turns, c1, c2, active, angleDeg) {
+        const loops = Math.max(4, Math.min(14, Math.floor(turns / 5)));
+        const h = 100;
+        const w = 52;
+        const xScale = Math.cos((angleDeg * Math.PI) / 180);
+
+        // Core
+        ctx.fillStyle = "#ffffff0a";
+        ctx.strokeStyle = "#ffffff14";
+        ctx.lineWidth = 1;
+        roundRect(ctx, cx - 7, cy - h / 2, 14, h, 4);
+        ctx.fill();
+        ctx.stroke();
+
+        // Winds
+        for (let i = 0; i < loops; i++) {
+          const y = cy - h / 2 + 8 + i * ((h - 16) / loops);
+          const g = ctx.createLinearGradient(
+            cx - w * xScale,
+            y,
+            cx + w * xScale,
+            y,
+          );
+          g.addColorStop(0, "#6a3a14");
+          g.addColorStop(0.3, c2);
+          g.addColorStop(0.6, c1);
+          g.addColorStop(1, "#6a3a14");
+          ctx.beginPath();
+          ctx.ellipse(cx, y, (w * xScale) / 2, 7, 0, 0, Math.PI * 2);
+          ctx.strokeStyle = g;
+          ctx.lineWidth = active ? 3 : 2.5;
+          if (active) {
+            ctx.shadowColor = "#c8763a";
+            ctx.shadowBlur = 3;
+          }
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+        }
+
+        // Flanges
+        [-h / 2, h / 2].forEach((dy) => {
+          const fg = ctx.createRadialGradient(
+            cx,
+            cy + dy,
+            0,
+            cx,
+            cy + dy,
+            (w * xScale) / 2 + 10,
+          );
+          fg.addColorStop(0, "#d8e0e8");
+          fg.addColorStop(1, "#8898a8");
+          ctx.fillStyle = fg;
+          ctx.strokeStyle = "#a0b0c0";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.ellipse(cx, cy + dy, (w * xScale) / 2 + 8, 9, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        });
+      }
+
+      function drawFieldLines(lx, rx, cy, t) {
+        if (S.k < 0.01) return;
+        const count = Math.max(2, Math.round(S.k * 14));
+        const h = 100;
+        const glowBoost = 0.2 + S.k * 0.4;
+
+        for (let i = 0; i < count; i++) {
+          const prog = i / count;
+          const yOff = (prog - 0.5) * h * 0.9;
+          const alpha = (1 - Math.abs(yOff) / (h * 0.5)) * S.k * 0.9;
+          const phase = t * (S.ac ? 3 : 1.5) + i * 0.5 + (S.rev ? Math.PI : 0);
+          const pulse = S.ac
+            ? 0.5 + 0.5 * Math.sin(phase)
+            : 0.7 + 0.3 * Math.sin(phase * 0.5);
+          const bow = (1 - Math.abs(yOff) / (h * 0.5)) * 22;
+
+          ctx.setLineDash([5, 5]);
+          ctx.strokeStyle = `rgba(245,200,66,${alpha * pulse * 0.8})`;
+          ctx.lineWidth = 1.2 + glowBoost;
+          ctx.shadowColor = `rgba(210,177,92,${alpha * pulse * 0.3})`;
+          ctx.shadowBlur = 2 + 4 * glowBoost;
+
+          ctx.beginPath();
+          ctx.moveTo(lx + 34, cy + yOff);
+          ctx.bezierCurveTo(
+            lx + (rx - lx) * 0.35,
+            cy + yOff - bow,
+            lx + (rx - lx) * 0.65,
+            cy + yOff - bow,
+            rx - 34,
+            cy + yOff,
+          );
+          ctx.stroke();
+        }
+        ctx.setLineDash([]);
+        ctx.shadowBlur = 0;
+
+        // Center label
+        ctx.fillStyle = `rgba(245,200,66,${S.k * 0.7})`;
+        ctx.font = '10px "JetBrains Mono"';
+        ctx.textAlign = "center";
+        ctx.fillText("B FIELD", (lx + rx) / 2, cy - 70);
+      }
+
+      function drawLED(x, cy) {
+        const glow = S.led / 100;
+        const blink =
+          S.rev && (S.on || S.ac) ? (Math.sin(S.t * 7) > 0 ? 1 : 0) : 1;
+        const g = glow * blink;
+
+        // Glow halo
+        if (g > 0.1) {
+          const r = ctx.createRadialGradient(x, cy - 22, 5, x, cy - 22, 55 * g);
+          r.addColorStop(0, `rgba(255,110,0,${0.45 * g})`);
+          r.addColorStop(1, "transparent");
+          ctx.fillStyle = r;
+          ctx.beginPath();
+          ctx.arc(x, cy - 22, 55, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Body
+        if (g > 0.05) {
+          ctx.shadowColor = "#ff5500";
+          ctx.shadowBlur = 20 * g;
+        }
+        const dg = ctx.createRadialGradient(x - 6, cy - 28, 2, x, cy - 22, 16);
+        if (g > 0.05) {
+          dg.addColorStop(0, `rgba(255,255,200,${g})`);
+          dg.addColorStop(0.5, `rgba(255,140,0,${g * 0.9})`);
+          dg.addColorStop(1, `rgba(180,60,0,${g * 0.7})`);
+        } else {
+          dg.addColorStop(0, "#3a1010");
+          dg.addColorStop(1, "#1a0808");
+        }
+        ctx.fillStyle = dg;
+        ctx.beginPath();
+        ctx.arc(x, cy - 22, 15, Math.PI, 0);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Base / neck
+        ctx.fillStyle = "#2a3530";
+        ctx.fillRect(x - 12, cy - 22, 24, 8);
+
+        // Pins
+        ctx.strokeStyle = "#5a6a5a";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x - 6, cy - 14);
+        ctx.lineTo(x - 6, cy + 14);
+        ctx.moveTo(x + 6, cy - 14);
+        ctx.lineTo(x + 6, cy + 14);
+        ctx.stroke();
+
+        // Label
+        ctx.fillStyle = g > 0.05 ? "rgba(255,136,68,0.9)" : "#2a3530";
+        ctx.font = 'bold 9px "JetBrains Mono"';
+        ctx.textAlign = "center";
+        ctx.fillText("LED", x, cy + 28);
+        if (S.rev && g > 0.05) {
+          ctx.fillStyle = "var(--gold)";
+          ctx.fillText("BLINK", x, cy + 40);
+        }
+      }
+
+      function drawLabels(lx, rx, cy) {
+        ctx.font = '11px "JetBrains Mono"';
+        ctx.textAlign = "center";
+
+        // Primary label
+        ctx.fillStyle = "#3b9eff";
+        ctx.fillText("PRIMARY", lx, cy - 68);
+        ctx.fillStyle = "#4a6070";
+        ctx.font = '9px "JetBrains Mono"';
+        ctx.fillText(`N₁=${S.n1}  μᵣ=${S.mu}`, lx, cy - 58);
+
+        // Secondary label
+        ctx.fillStyle = "#22d47a";
+        ctx.font = '11px "JetBrains Mono"';
+        ctx.fillText("SECONDARY", rx, cy - 68);
+        ctx.fillStyle = "#4a6070";
+        ctx.font = '9px "JetBrains Mono"';
+        ctx.fillText(`N₂=${S.n2}  RL=${S.load}Ω`, rx, cy - 58);
+
+        // Distance marker
+        ctx.strokeStyle = "#1c2733";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 4]);
+        ctx.beginPath();
+        ctx.moveTo(lx + 42, cy + 68);
+        ctx.lineTo(rx - 42, cy + 68);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = "#f5c84280";
+        ctx.font = '9px "JetBrains Mono"';
+        ctx.fillText(`← ${S.dist} cm →`, (lx + rx) / 2, cy + 80);
+
+        // Angle indicator
+        if (S.angle > 0) {
+          ctx.fillStyle = "rgba(245,200,66,0.6)";
+          ctx.font = '9px "JetBrains Mono"';
+          ctx.fillText(`∠${S.angle}°`, lx, cy + 80);
+        }
+
+        // Shield indicator
+        if (S.shield) {
+          ctx.fillStyle = "rgba(255,79,79,0.5)";
+          ctx.font = '9px "JetBrains Mono"';
+          ctx.fillText("🛡 SHIELDED", (lx + rx) / 2, cy - 90);
+        }
+      }
+
+      // ══════════════════════════════════════════
+      //  UTILS
+      // ══════════════════════════════════════════
+      function roundRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+      }
+
+      const faradayBtn = document.getElementById("faradayBtn");
+      const faradayModal = document.getElementById("faradayModal");
+      const faradayClose = document.getElementById("faradayClose");
+
+      function openFaradayModal() {
+        faradayModal.classList.add("open");
+        faradayModal.setAttribute("aria-hidden", "false");
+      }
+
+      function closeFaradayModal() {
+        faradayModal.classList.remove("open");
+        faradayModal.setAttribute("aria-hidden", "true");
+      }
+
+      faradayBtn.addEventListener("click", openFaradayModal);
+      faradayClose.addEventListener("click", closeFaradayModal);
+      faradayModal.addEventListener("click", (event) => {
+        if (event.target === faradayModal) {
+          closeFaradayModal();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && faradayModal.classList.contains("open")) {
+          closeFaradayModal();
+        }
+      });
+
+      // ══════════════════════════════════════════
+      //  INIT
+      // ══════════════════════════════════════════
+      updateSim();
+      requestAnimationFrame(draw);
+      log("Simulator initialized — all systems nominal.", "g");
+      log("Simulation idle — switch is open.", "y");
+    </script>
+  </body>
+</html>
